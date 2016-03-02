@@ -10290,25 +10290,23 @@ Elm.Main.make = function (_elm) {
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
+   var jsonData = " {\"positionCategories\":[{\"id\": 1, \"isOn\" : true, \"name\": \"Front End Web\"}],\n                \"coreCompetencies\":[{\"id\": 1, \"isOn\" : true, \"name\": \"Javascript\"}]} ";
    var update = F2(function (action,model) {
       var _p0 = action;
-      switch (_p0.ctor)
-      {case "PositionCategoryClicked": var newCc = A3($List.foldr,
-           F2(function (pc,ccs) {    return A2($List.append,pc.cc,ccs);}),
-           _U.list([]),
-           A2($List.filter,function (pc) {    return pc.isOn;},model.pc));
-           var newPc = A2($List.map,function (i) {    return _U.eq(i.id,_p0._0) ? _U.update(i,{isOn: $Basics.not(i.isOn)}) : i;},model.pc);
-           return _U.update(model,{pc: newPc,cc: newCc});
-         case "CoreCompetencyClicked": return model;
-         default: return model;}
+      if (_p0.ctor === "PositionCategoryClicked") {
+            var newPc = A2($List.map,function (i) {    return _U.eq(i.id,_p0._0) ? _U.update(i,{isOn: $Basics.not(i.isOn)}) : i;},model.pc);
+            return _U.update(model,{pc: newPc});
+         } else {
+            return model;
+         }
    });
-   var SkillClicked = function (a) {    return {ctor: "SkillClicked",_0: a};};
    var CoreCompetencyClicked = function (a) {    return {ctor: "CoreCompetencyClicked",_0: a};};
    var PositionCategoryClicked = function (a) {    return {ctor: "PositionCategoryClicked",_0: a};};
    var view = F2(function (address,model) {
@@ -10322,7 +10320,7 @@ Elm.Main.make = function (_elm) {
               function (i) {
                  return A2($Html.span,
                  _U.list([$Html$Attributes.$class("position-category"),A2($Html$Events.onClick,address,PositionCategoryClicked(i.id))]),
-                 _U.list([$Html.text($Basics.toString(i.name))]));
+                 _U.list([$Html.text($Basics.toString(i.isOn))]));
               },
               model.pc)))
               ,A2($Html.div,
@@ -10333,36 +10331,47 @@ Elm.Main.make = function (_elm) {
                  _U.list([$Html$Attributes.$class("core-competency"),A2($Html$Events.onClick,address,CoreCompetencyClicked(i.id))]),
                  _U.list([$Html.text(i.name)]));
               },
-              model.cc))
-              ,A2($Html.div,
-              _U.list([$Html$Attributes.id("skill-container")]),
-              A2($List.map,
-              function (i) {
-                 return A2($Html.span,
-                 _U.list([$Html$Attributes.$class("skill"),A2($Html$Events.onClick,address,SkillClicked(i.id))]),
-                 _U.list([$Html.text(i.name)]));
-              },
-              model.ss))]));
+              model.cc))]));
    });
-   var model = {pc: _U.list([{isOn: true,name: "pos cat 1",id: 1,cc: _U.list([{isOn: true,name: "core comp 1",id: 1,ss: _U.list([])}]),ss: _U.list([])}
-                            ,{isOn: false,name: "pos cat 2",id: 2,cc: _U.list([]),ss: _U.list([])}])
-               ,cc: _U.list([])
-               ,ss: _U.list([])};
-   var SS = F3(function (a,b,c) {    return {isOn: a,name: b,id: c};});
-   var CC = F4(function (a,b,c,d) {    return {isOn: a,name: b,id: c,ss: d};});
-   var PC = F5(function (a,b,c,d,e) {    return {isOn: a,name: b,id: c,cc: d,ss: e};});
-   var Model = F3(function (a,b,c) {    return {pc: a,cc: b,ss: c};});
+   var CC = F3(function (a,b,c) {    return {isOn: a,name: b,id: c};});
+   var decodeCc = A4($Json$Decode.object3,
+   CC,
+   A2($Json$Decode._op[":="],"isOn",$Json$Decode.bool),
+   A2($Json$Decode._op[":="],"name",$Json$Decode.string),
+   A2($Json$Decode._op[":="],"id",$Json$Decode.$int));
+   var decoderCcs = A2($Json$Decode._op[":="],"coreCompetencies",$Json$Decode.list(decodeCc));
+   var PC = F3(function (a,b,c) {    return {isOn: a,name: b,id: c};});
+   var decodePc = A4($Json$Decode.object3,
+   PC,
+   A2($Json$Decode._op[":="],"isOn",$Json$Decode.bool),
+   A2($Json$Decode._op[":="],"name",$Json$Decode.string),
+   A2($Json$Decode._op[":="],"id",$Json$Decode.$int));
+   var decoderPcs = A2($Json$Decode._op[":="],"positionCategories",$Json$Decode.list(decodePc));
+   var Model = F2(function (a,b) {    return {pc: a,cc: b};});
+   var decoder = A3($Json$Decode.object2,Model,decoderPcs,decoderCcs);
+   var model = function () {
+      var _p1 = A2($Json$Decode.decodeString,decoder,jsonData);
+      if (_p1.ctor === "Ok") {
+            return _p1._0;
+         } else {
+            return {pc: _U.list([{isOn: false,name: $Basics.toString(_p1._0),id: 1}]),cc: _U.list([])};
+         }
+   }();
    var main = $StartApp$Simple.start({model: model,view: view,update: update});
    return _elm.Main.values = {_op: _op
                              ,main: main
                              ,Model: Model
                              ,PC: PC
                              ,CC: CC
-                             ,SS: SS
+                             ,decoderCcs: decoderCcs
+                             ,decoderPcs: decoderPcs
+                             ,decodeCc: decodeCc
+                             ,decodePc: decodePc
+                             ,decoder: decoder
                              ,model: model
                              ,view: view
                              ,PositionCategoryClicked: PositionCategoryClicked
                              ,CoreCompetencyClicked: CoreCompetencyClicked
-                             ,SkillClicked: SkillClicked
-                             ,update: update};
+                             ,update: update
+                             ,jsonData: jsonData};
 };</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script></body></html>
