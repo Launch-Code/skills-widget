@@ -15,3 +15,6 @@ type alias CoreCompetency =
 
 
 type alias ID = Int
+
+
+

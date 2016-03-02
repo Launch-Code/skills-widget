@@ -10,7 +10,7 @@ module
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Dict 
+import Dict exposing (Dict)
 import List.Extra as ListEx
 
 import Selectable as Sel
@@ -18,18 +18,6 @@ import MultiSelect as MultSel
 
 
 -- MODEL
-
-
-
-type alias DependentSelectable =
-    { isVisible : Bool 
-    , selType : TypeOfSelectable
-    , depencies : List Sel.Model 
-    }
-
-type TypeOfSelectable 
-    = PositionCategory
-    | CoreCompetency 
 
 
 type alias Model =
@@ -58,10 +46,14 @@ update : Action -> Model -> Model
 update action model =
     case action of 
         PosCats msAction ->
-            { model |
-                positionCategories = 
+            let newPosCats = 
                     MultSel.update msAction model.positionCategories
-            }
+            in 
+                { model |
+                    positionCategories = newPosCats
+                ,   coreCompetencies =
+                        updateCoreComps newPosCats model.coreCompetencies
+                }
 
         CoreComps msAction ->
             { model | 
@@ -98,5 +90,54 @@ multiSelectView msAddress msModel msName =
         [ Html.h3 [] [ Html.text msName ]
         , MultSel.view msAddress msModel
         ]
+
+
+
+-- DATA
+
+coreCompDependencies : Dict String (List String)
+coreCompDependencies = 
+    Dict.fromList <|
+        [ ( "Web", [ "Java", "Javascript", "Elm" ] )
+        , ( "Software", [ "Java" ] )
+        , ( "LulzSec", [ "Java", "Elm" ] )
+        ]
+
+
+coreCompChildren : List String -> List String
+coreCompChildren posCatNames =
+    List.concatMap 
+        (\pcName -> 
+            Maybe.withDefault [] 
+                (Dict.get pcName coreCompDependencies)
+        )
+        posCatNames
+
+
+updateCoreComps : MultSel.Model -> MultSel.Model -> MultSel.Model
+updateCoreComps posCats oldCoreComps =
+    let selectedPosCatNames = 
+            List.filter .isSelected (unwrapSelectables posCats)
+                |> List.map .name
+        availableCCNames = 
+            coreCompChildren selectedPosCatNames
+    in 
+        oldCoreComps.items
+            |> List.map
+                (\(_, selShowHide) ->
+                    { selShowHide |
+                        isVisible = 
+                            List.member 
+                                selShowHide.selectable.name 
+                                availableCCNames
+                    }
+                )
+            |> MultSel.initWithShowHides
+
+
+unwrapSelectables : MultSel.Model -> List Sel.Model 
+unwrapSelectables msModel =
+    msModel.items
+        |> List.map (snd >> .selectable)
 
 

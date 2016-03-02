@@ -1,7 +1,10 @@
 module 
     MultiSelect 
-        ( Model
+        ( SelectableShowHide
+        , Model
         , init
+        , initWithShowHides
+        , initWithIDs
         , Action
         , update
         , view
@@ -29,11 +32,23 @@ type alias Model =
 
 
 init : List Sel.Model -> Model
-init items = 
-    items 
+init selectables = 
+    selectables 
         |> List.map (\i -> SelectableShowHide i True)
         |> indexedList
         |> Model
+
+
+initWithShowHides : List SelectableShowHide -> Model
+initWithShowHides showHides =
+    showHides
+        |> indexedList
+        |> Model
+
+
+initWithIDs : List (ID, SelectableShowHide) -> Model
+initWithIDs =
+    Model
 
 
 type alias ID =
