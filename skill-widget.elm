@@ -9,31 +9,35 @@ import Json.Decode as Decode exposing (Decoder, (:=) )
 main =
   StartApp.start { model = model, view = view, update = update }
 
-type alias Model = { pc : List PC, cc : List CC }
-type alias PC = { isOn : Bool, name : String, id : ID }
-type alias CC = { isOn : Bool, name : String, id : ID }
+
+type alias Model = { selected: List (ItemType, ID), pc : List PC, cc : List CC }
+type alias PC = { name : String, id : ID }
+type alias CC = { name : String, id : ID }
 -- type alias SS = { isOn : Bool, name : String, id : ID }
 type alias ID = Int
+type ItemType = PositionCategory
+              | CoreCompetency
+
 
 decoderCcs : Decoder (List CC)
 decoderCcs = "coreCompetencies" := Decode.list decodeCc
 decoderPcs : Decoder (List PC)
 decoderPcs = "positionCategories" := Decode.list decodePc
 decodeCc : Decoder CC
-decodeCc = Decode.object3 CC ("isOn" := Decode.bool) ("name" := Decode.string) ("id" := Decode.int)
+decodeCc = Decode.object2 CC  ("name" := Decode.string) ("id" := Decode.int)
 decodePc : Decoder PC
-decodePc = Decode.object3 PC ("isOn" := Decode.bool) ("name" := Decode.string) ("id" := Decode.int)
--- decoderCcs : Decoder List CC
+decodePc = Decode.object2 PC  ("name" := Decode.string) ("id" := Decode.int)
 decoder : Decoder Model
-decoder = Decode.object2 Model decoderPcs decoderCcs
+decoder = Decode.object2 (\pc cc -> {pc=pc, cc=cc, selected=[]}) decoderPcs decoderCcs
 
 model : Model
 model =
   case Decode.decodeString decoder jsonData of
     Ok m -> m
     Err e -> {
-      pc = [{isOn = False, name = (toString e), id = 1}],
-      cc = []
+      pc = [{name = (toString e), id = 1}],
+      cc = [],
+      selected = [(PositionCategory, 1)]
     }
 
   -- {pc = [{isOn = True, name = "pos cat 1", id = 1, cc = [{isOn = True, name = "core comp 1", id = 1, ss = []}], ss = []},
@@ -56,7 +60,8 @@ view address model =
         (List.map
           (\i -> Html.span [Attrs.class "core-competency", Events.onClick address (CoreCompetencyClicked i.id)] [Html.text i.name]) model.cc
         )
-      )
+      ),
+      (Html.div [] [Html.text <| toString model.selected])
     ]
 
 type Action = PositionCategoryClicked ID
@@ -67,7 +72,7 @@ update action model =
   case action of
     PositionCategoryClicked id ->
       let
-        newPc = List.map (\i -> if i.id == id then { i | isOn = not i.isOn } else i) model.pc
+        newPc = List.map (\i -> if i.id == id then  i else i) model.pc
         -- newCc = List.foldr (\pc ccs -> List.append pc.cc ccs) [] (List.filter (\pc -> pc.isOn) model.pc)
       in
       { model |
@@ -78,8 +83,8 @@ update action model =
       model
 
 jsonData : String
-jsonData = """ {"positionCategories":[{"id": 1, "isOn" : true, "name": "Front End Web"}],
-                "coreCompetencies":[{"id": 1, "isOn" : true, "name": "Javascript"}]} """
+jsonData = """ {"positionCategories":[{"id": 1, "name": "Front End Web"}],
+                "coreCompetencies":[{"id": 1, "name": "Javascript"}]} """
 --       {"name":"Front End Web",
 --        "id":1,
 --        "coreCompetencies":[
