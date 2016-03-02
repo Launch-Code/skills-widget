@@ -77,10 +77,16 @@ update action model =
       in
       { model |
           pc = newPc
+          selected = updateSelectedPositionCategories model.selected id
           -- cc = newCc
       }
     CoreCompetencyClicked id ->
       model
+updateSelectedPositionCategories : List (ItemType, ID) -> ID -> List (ItemType, ID)
+updateSelectedPositionCategories selected id =
+  let selectedPcs = List.filter (\s -> fst s == PositionCategory) in
+
+
 
 jsonData : String
 jsonData = """ {"positionCategories":[{"id": 1, "name": "Front End Web"}],
