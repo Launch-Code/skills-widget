@@ -18,13 +18,22 @@ import Selectable as Sel
 
 -- MODEL
 
+type alias SelectableShowHide =
+    { selectable : Sel.Model
+    , isVisible : Bool 
+    }
+
+
 type alias Model =
-    { items : List (ID, Sel.Model) }
+    { items : List (ID, SelectableShowHide) }
 
 
 init : List Sel.Model -> Model
 init items = 
-    Model (indexedList items)
+    items 
+        |> List.map (\i -> SelectableShowHide i True)
+        |> indexedList
+        |> Model
 
 
 type alias ID =
@@ -42,12 +51,15 @@ update : Action -> Model -> Model
 update action model =
     case action of 
         Selectable selID selAction ->
-            let updateItem (id, item) =
-                    ( id
-                    , if id == selID 
-                        then Sel.update selAction item
-                        else  item
-                    )
+            let updateItem (id, selShowHide) =
+                    (,) id <|
+                        if id == selID then
+                            { selShowHide | 
+                                selectable =
+                                    Sel.update selAction selShowHide.selectable
+                            }
+                        else 
+                            selShowHide
             in 
                 { model |
                     items = List.map updateItem model.items 
@@ -62,15 +74,17 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-    Html.div []
-        <| List.map (itemView address) model.items
+    let onlyVisibles = List.filter (\(_, {isVisible}) -> isVisible)
+    in 
+        Html.div []
+            <| List.map (itemView address) (onlyVisibles model.items)
 
 
-itemView : Signal.Address Action -> (ID, Sel.Model) -> Html
-itemView address (id, item) =
+itemView : Signal.Address Action -> (ID, SelectableShowHide) -> Html
+itemView address (id, {selectable}) =
     Sel.view 
         (Signal.forwardTo address <| Selectable id)
-        item
+        selectable
 
 
 -- HELPERS

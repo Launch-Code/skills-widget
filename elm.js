@@ -10917,7 +10917,9 @@ Elm.MultiSelect.make = function (_elm) {
                var _p3 = _p2;
                var _p5 = _p3._1;
                var _p4 = _p3._0;
-               return {ctor: "_Tuple2",_0: _p4,_1: _U.eq(_p4,_p1._0) ? A2($Selectable.update,_p1._1,_p5) : _p5};
+               return A2(F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),
+               _p4,
+               _U.eq(_p4,_p1._0) ? _U.update(_p5,{selectable: A2($Selectable.update,_p1._1,_p5.selectable)}) : _p5);
             };
             return _U.update(model,{items: A2($List.map,updateItem,model.items)});
          } else {
@@ -10926,10 +10928,17 @@ Elm.MultiSelect.make = function (_elm) {
    });
    var NoOp = {ctor: "NoOp"};
    var Selectable = F2(function (a,b) {    return {ctor: "Selectable",_0: a,_1: b};});
-   var itemView = F2(function (address,_p6) {    var _p7 = _p6;return A2($Selectable.view,A2($Signal.forwardTo,address,Selectable(_p7._0)),_p7._1);});
-   var view = F2(function (address,model) {    return A2($Html.div,_U.list([]),A2($List.map,itemView(address),model.items));});
+   var itemView = F2(function (address,_p6) {
+      var _p7 = _p6;
+      return A2($Selectable.view,A2($Signal.forwardTo,address,Selectable(_p7._0)),_p7._1.selectable);
+   });
+   var view = F2(function (address,model) {
+      var onlyVisibles = $List.filter(function (_p8) {    var _p9 = _p8;return _p9._1.isVisible;});
+      return A2($Html.div,_U.list([]),A2($List.map,itemView(address),onlyVisibles(model.items)));
+   });
    var Model = function (a) {    return {items: a};};
-   var init = function (items) {    return Model(indexedList(items));};
+   var SelectableShowHide = F2(function (a,b) {    return {selectable: a,isVisible: b};});
+   var init = function (items) {    return Model(indexedList(A2($List.map,function (i) {    return A2(SelectableShowHide,i,false);},items)));};
    return _elm.MultiSelect.values = {_op: _op,init: init,update: update,view: view,Model: Model};
 };
 Elm.SkillsWidget = Elm.SkillsWidget || {};
@@ -10942,18 +10951,12 @@ Elm.SkillsWidget.make = function (_elm) {
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
-   $List$Extra = Elm.List.Extra.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $MultiSelect = Elm.MultiSelect.make(_elm),
    $Result = Elm.Result.make(_elm),
+   $Selectable = Elm.Selectable.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var onlyVisibles = function (_p0) {
-      var _p1 = _p0;
-      var _p4 = _p1.multiSelect;
-      return _U.update(_p4,
-      {items: A2($List.map,$Basics.fst,A2($List.filter,function (_p2) {    var _p3 = _p2;return _p3._1._1;},A2($List$Extra.zip,_p4.items,_p1.visibilities)))});
-   };
    var multiSelectView = F3(function (msAddress,msModel,msName) {
       return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
    });
@@ -10961,29 +10964,28 @@ Elm.SkillsWidget.make = function (_elm) {
       var updateMS = F2(function (msAction,msShowHide) {
          return _U.update(msShowHide,{multiSelect: A2($MultiSelect.update,msAction,msShowHide.multiSelect)});
       });
-      var _p5 = action;
-      if (_p5.ctor === "PosCats") {
-            return _U.update(model,{positionCategories: A2(updateMS,_p5._0,model.positionCategories)});
+      var _p0 = action;
+      if (_p0.ctor === "PosCats") {
+            return _U.update(model,{positionCategories: A2($MultiSelect.update,_p0._0,model.positionCategories)});
          } else {
-            return _U.update(model,{coreCompetencies: A2(updateMS,_p5._0,model.coreCompetencies)});
+            return _U.update(model,{coreCompetencies: A2($MultiSelect.update,_p0._0,model.coreCompetencies)});
          }
    });
    var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
    var PosCats = function (a) {    return {ctor: "PosCats",_0: a};};
-   var view = F2(function (address,_p6) {
-      var _p7 = _p6;
+   var view = F2(function (address,_p1) {
+      var _p2 = _p1;
       var forwardTo = $Signal.forwardTo(address);
       return A2($Html.div,
       _U.list([]),
-      _U.list([A3(multiSelectView,forwardTo(PosCats),onlyVisibles(_p7.positionCategories),"Position Categories")
-              ,A3(multiSelectView,forwardTo(CoreComps),onlyVisibles(_p7.coreCompetencies),"Core Cometencies")]));
+      _U.list([A3(multiSelectView,forwardTo(PosCats),_p2.positionCategories,"Position Categories")
+              ,A3(multiSelectView,forwardTo(CoreComps),_p2.coreCompetencies,"Core Cometencies")]));
    });
    var Model = F2(function (a,b) {    return {positionCategories: a,coreCompetencies: b};});
-   var MultiSelectShowHide = F2(function (a,b) {    return {multiSelect: a,visibilities: b};});
-   var withShowHide = function (ms) {
-      return A2(MultiSelectShowHide,ms,A2($List.map,function (_p8) {    var _p9 = _p8;return {ctor: "_Tuple2",_0: _p9._0,_1: true};},ms.items));
-   };
-   var init = F2(function (posCatsMS,coreCompsMS) {    return A2(Model,withShowHide(posCatsMS),withShowHide(coreCompsMS));});
+   var init = F2(function (posCatsMS,coreCompsMS) {    return A2(Model,posCatsMS,coreCompsMS);});
+   var CoreCompetency = {ctor: "CoreCompetency"};
+   var PositionCategory = {ctor: "PositionCategory"};
+   var DependentSelectable = F3(function (a,b,c) {    return {isVisible: a,selType: b,depencies: c};});
    return _elm.SkillsWidget.values = {_op: _op,init: init,update: update,view: view,Model: Model};
 };
 Elm.Main = Elm.Main || {};
