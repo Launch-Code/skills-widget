@@ -1,6 +1,7 @@
-module Data (Model, data) where
+module Data (Model, CoreCompetency, PositionCategory, data) where
 
-import MultiSelect exposing (SelectableShowHide)
+import MultiSelect
+import Selectable
 import Json.Decode as Decode exposing (Decoder, (:=))
 
 -- Data Models
@@ -10,14 +11,12 @@ type alias Model =
   }
 
 type alias PositionCategory =
-  { id : ID
-  , selectable : SelectableShowHide
+  { selectable : Selectable.Model
   , coreCompetencyIds : List ID
   }
 
 type alias CoreCompetency =
-  { id : Int
-  , selectable : SelectableShowHide
+  { selectable : Selectable.Model
   }
 
 type alias ID = Int
@@ -56,12 +55,12 @@ modelDecoder = Decode.object2 Model posCatsDecoder coreCompsDecoder
 posCatsDecoder : Decoder (List PositionCategory)
 posCatsDecoder = "positionCategories" := Decode.list posCatDecoder
 posCatDecoder : Decoder PositionCategory
-posCatDecoder = Decode.object3 PositionCategory ("id" := Decode.int) selectableDecoder ("coreCompetencyIds" := Decode.list Decode.int)
+posCatDecoder = Decode.object2 PositionCategory selectableDecoder ("coreCompetencyIds" := Decode.list Decode.int)
 
 coreCompsDecoder : Decoder (List CoreCompetency)
 coreCompsDecoder = "coreCompetencies" := Decode.list coreCompDecoder
 coreCompDecoder : Decoder CoreCompetency
-coreCompDecoder = Decode.object2 CoreCompetency ("id" := Decode.int) selectableDecoder
+coreCompDecoder = Decode.object1 CoreCompetency selectableDecoder
 
-selectableDecoder : Decoder SelectableShowHide
-selectableDecoder = Decode.object1 (\n -> { selectable = {name = n, isSelected = False}, isVisible = True }) ("name" := Decode.string)
+selectableDecoder : Decoder Selectable.Model
+selectableDecoder = Decode.object2 (\id n -> Selectable.init id n False) ("id" := Decode.int) ("name" := Decode.string) 

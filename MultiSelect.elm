@@ -1,10 +1,7 @@
 module
     MultiSelect
-        ( SelectableShowHide
-        , Model
+        ( Model
         , init
-        , initWithShowHides
-        , initWithIDs
         , Action
         , update
         , view
@@ -21,91 +18,46 @@ import Selectable as Sel
 
 -- MODEL
 
-type alias SelectableShowHide =
-    { selectable : Sel.Model
-    , isVisible : Bool
-    }
+-- type alias SelectableShowHide =
+--     { selectable : Sel.Model
+--     , isVisible : Bool
+--     }
 
 
 type alias Model =
-    { items : List (ID, SelectableShowHide) }
+    List Sel.Model
 
 
 init : List Sel.Model -> Model
-init selectables = 
-    selectables 
-        |> List.map (\i -> SelectableShowHide i True)
-        |> indexedList
-        |> Model
+init selModel = selModel
 
-
-initWithShowHides : List SelectableShowHide -> Model
-initWithShowHides showHides =
-    showHides
-        |> indexedList
-        |> Model
-
-
-initWithIDs : List (ID, SelectableShowHide) -> Model
-initWithIDs =
-    Model
-
-
-type alias ID =
-    Int
-
+type alias ID = Int
 
 -- UPDATE
-
-type Action 
-    = Selectable ID Sel.Action
-    | NoOp
-
+type Action
+  = Selectable ID Sel.Action
 
 update : Action -> Model -> Model
 update action model =
-    case action of 
-        Selectable selID selAction ->
-            let updateItem (id, selShowHide) =
-                    (,) id <|
-                        if id == selID then
-                            { selShowHide | 
-                                selectable =
-                                    Sel.update selAction selShowHide.selectable
-                            }
-                        else 
-                            selShowHide
-            in 
-                { model |
-                    items = List.map updateItem model.items 
-                }
-
-        _ -> 
-            model
-
+    case action of
+        Selectable selectedID selAction ->
+            let updateItem sel =
+              if sel.id == selectedID then
+                Sel.update selAction sel
+              else
+                sel
+            in
+               List.map updateItem model
 
 -- VIEW
-
-
 view : Signal.Address Action -> Model -> Html
 view address model =
-    let onlyVisibles = List.filter (\(_, {isVisible}) -> isVisible)
-    in 
-        Html.div []
-            <| List.map (itemView address) (onlyVisibles model.items)
+  Html.div []
+    <| List.map (itemView address) model
 
 
-itemView : Signal.Address Action -> (ID, SelectableShowHide) -> Html
-itemView address (id, {selectable}) =
-    Sel.view 
-        (Signal.forwardTo address <| Selectable id)
+itemView : Signal.Address Action -> Sel.Model -> Html
+itemView address selectable =
+    Sel.view
+        (Signal.forwardTo address <| Selectable selectable.id)
         selectable
-
-
--- HELPERS
-
-indexedList : List a -> List (ID, a)
-indexedList xs =
-    let length = Array.length << Array.fromList <| xs
-    in 
-        ListEx.zip [ 0 .. length - 1] xs

@@ -20,14 +20,16 @@ import String
 {-| an option that the user can toggle on and off
 -}
 type alias Model =
-    { name : String
-    , isSelected : Bool 
+    { id : ID
+    , name : String
+    , isSelected : Bool
     }
 
+type alias ID = Int
 
-init : String -> Bool -> Model
+init : ID -> String -> Bool -> Model
 init =
-    Model
+  Model
 
 
 -- UPDATE
@@ -53,18 +55,18 @@ update action model =
 view : Signal.Address Action -> Model -> Html
 view address model =
     let allCapsIfSelected =
-            if model.isSelected 
+            if model.isSelected
                 then String.toUpper
                 else identity
         classSuffix =
             if model.isSelected
                 then "on"
                 else "off"
-    in 
+    in
         Html.button
-            [ Evnt.onClick 
+            [ Evnt.onClick
                 (Signal.forwardTo address (\_ -> Toggle))
-                NoOp 
+                NoOp
             , Attr.class ("selectable-" ++ classSuffix)
             ]
             [ Html.text (model.name |> allCapsIfSelected) ]
