@@ -40,14 +40,12 @@ update : Action -> Model -> Model
 update action model =
   case action of
     PosCats msAction ->
-      model
-            -- let newPosCats =
-            --         MultSel.update msAction model.positionCategories
-            -- in
-            --     { model |
-            --         positionCategories = newPosCats
-            --     ,   coreCompetencies = updateCoreComps newPosCats model.coreCompetencies
-            --     }
+      let newPosCats = MultSel.update msAction (toSelectableShowHide model.positionCategories)
+      in
+        { model |
+          positionCategories = newPosCats
+        -- ,  coreCompetencies = updateCoreComps newPosCats model.coreCompetencies
+        }
 
     CoreComps msAction ->
       model
@@ -65,12 +63,12 @@ view address { positionCategories, coreCompetencies } =
       Html.div []
         [ multiSelectView
           (forwardTo PosCats)
-          {items = (List.map (\i -> (i.id, i.selectable)) positionCategories)}
+          (toSelectableShowHide positionCategories)
           "Position Categories"
           , multiSelectView
           (forwardTo CoreComps)
-          {items = (List.map (\i -> (i.id, i.selectable)) coreCompetencies)}
-          "Core Competencies"
+          (toSelectableShowHide coreCompetencies)
+          "Core Compet tencies"
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
@@ -145,3 +143,7 @@ data = Data.data
 -- unwrapSelectables msModel =
 --     msModel.items
 --         |> List.map (snd >> .selectable)
+
+--  Helpers
+toSelectableShowHide arr =
+  { items = (List.map (\i -> (i.id, i.selectable)) arr) }

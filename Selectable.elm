@@ -5,7 +5,7 @@ module
         , Action
         , update
         , view
-        ) 
+        )
     where
 
 

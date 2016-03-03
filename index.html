@@ -10966,6 +10966,7 @@ Elm.SkillsWidget.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
+   var toSelectableShowHide = function (arr) {    return {items: A2($List.map,function (i) {    return {ctor: "_Tuple2",_0: i.id,_1: i.selectable};},arr)};};
    var data = $Data.data;
    var multiSelectView = F3(function (msAddress,msModel,msName) {
       return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
@@ -10978,14 +10979,8 @@ Elm.SkillsWidget.make = function (_elm) {
       var forwardTo = $Signal.forwardTo(address);
       return A2($Html.div,
       _U.list([]),
-      _U.list([A3(multiSelectView,
-              forwardTo(PosCats),
-              {items: A2($List.map,function (i) {    return {ctor: "_Tuple2",_0: i.id,_1: i.selectable};},_p2.positionCategories)},
-              "Position Categories")
-              ,A3(multiSelectView,
-              forwardTo(CoreComps),
-              {items: A2($List.map,function (i) {    return {ctor: "_Tuple2",_0: i.id,_1: i.selectable};},_p2.coreCompetencies)},
-              "Core Competencies")]));
+      _U.list([A3(multiSelectView,forwardTo(PosCats),toSelectableShowHide(_p2.positionCategories),"Position Categories")
+              ,A3(multiSelectView,forwardTo(CoreComps),toSelectableShowHide(_p2.coreCompetencies),"Core Compet tencies")]));
    });
    var main = $StartApp$Simple.start({model: data,update: update,view: view});
    return _elm.SkillsWidget.values = {_op: _op
@@ -10995,5 +10990,6 @@ Elm.SkillsWidget.make = function (_elm) {
                                      ,update: update
                                      ,view: view
                                      ,multiSelectView: multiSelectView
-                                     ,data: data};
+                                     ,data: data
+                                     ,toSelectableShowHide: toSelectableShowHide};
 };</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.SkillsWidget)</script></body></html>
