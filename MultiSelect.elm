@@ -1,5 +1,5 @@
-module 
-    MultiSelect 
+module
+    MultiSelect
         ( SelectableShowHide
         , Model
         , init
@@ -23,7 +23,7 @@ import Selectable as Sel
 
 type alias SelectableShowHide =
     { selectable : Sel.Model
-    , isVisible : Bool 
+    , isVisible : Bool
     }
 
 

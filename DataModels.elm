@@ -1,20 +1,22 @@
-module DataModels where
+module
+  DataModels
+    ( PositionCategory
+    , CoreCompetency
+    )
+  where
 
 import Selectable as Sel
 
-
-
 type alias PositionCategory =
-    { selectable : Sel.Model
-    , coreCompetencies : List CoreCompetency
-    }
+  { id : Int
+  , selectable : Sel.Model
+  , coreCompetencyIds : List ID
+  }
 
 
 type alias CoreCompetency =
-    { selectable : SkillItem }
-
+  { id : Int
+  , selectable : Sel.Model
+  }
 
 type alias ID = Int
-
-
-
