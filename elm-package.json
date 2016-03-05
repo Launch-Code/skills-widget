@@ -1,10 +1,10 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
+    "summary": "Skill Widget to guide selecting of skills",
+    "repository": "https://github.com/Launch-Code/skills-widget.git",
     "license": "BSD3",
     "source-directories": [
-        "."
+        "./src"
     ],
     "exposed-modules": [],
     "dependencies": {

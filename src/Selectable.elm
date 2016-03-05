@@ -1,5 +1,5 @@
-module 
-    Selectable 
+module
+    Selectable
         ( Model
         , init
         , Action
@@ -11,7 +11,7 @@ module
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Html.Events as Evnt 
+import Html.Events as Evnt
 import String
 import Graphics.Input as Input
 
@@ -42,7 +42,7 @@ type Action
 
 update : Action -> Model -> Model
 update action model =
-    case action of 
+    case action of
         Toggle ->
             { model |
                 isSelected = not model.isSelected
@@ -64,10 +64,7 @@ view address model =
         onClickAddress = 
             Signal.forwardTo address (\_ -> Toggle)
         className =
-            "selectable-"
-                ++ if model.isSelected
-                    then "on"
-                    else "off"
+            "selectable-" ++ if model.isSelected then "on" else "off"
     in
         Html.button 
             [ Evnt.onClick onClickAddress NoOp

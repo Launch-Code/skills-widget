@@ -1,31 +1,25 @@
 module SkillsWidget where
-
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Dict exposing (Dict)
 import List.Extra as ListEx
 import StartApp.Simple as StartApp
-
-import Selectable as Sel
 import MultiSelect as MultSel
-import Data exposing (Model, LinkedSelectable)
+import JsonParser
+import Selectable
+import Model exposing (Model, LinkedSelectable)
 
-
+-- Initialization
 main : Signal Html
 main =
   StartApp.start
-    { model = Data.data
+    -- { model = JsonParser.parseJson jsonData
+    { model = JsonParser.testData
     , update = update
     , view = view
     }
 
-
--- MODEL
-
---port jsonData : String
-
-type alias ID = Int
-
+port jsonData : String
 
 -- UPDATE
 
@@ -40,13 +34,13 @@ update action model =
     case action of
         PosCats msAction ->
             { model |
-                positionCategories = 
+                positionCategories =
                     updateLinkedSels msAction model.positionCategories
             }
         CoreComps msAction ->
             { model |
                 coreCompetencies =
-                    updateLinkedSels msAction model.coreCompetencies          
+                    updateLinkedSels msAction model.coreCompetencies
             }
         Skills msAction ->
             { model |
@@ -86,36 +80,36 @@ multiSelectView msAddress msModel msName =
 -- LOGIC
 ------------------------
 
-{-| extract selectables from their LinkedSelectable wrappers, 
-    update them according to the MultiSelect Action that just occured, 
+{-| extract selectables from their LinkedSelectable wrappers,
+    update them according to the MultiSelect Action that just occured,
     then merge the new selectables back into the wrappers
 -}
 updateLinkedSels : MultSel.Action -> List LinkedSelectable -> List LinkedSelectable
 updateLinkedSels msAction linkedSels =
     linkedSels
         |> extractSelectables
-        |> MultSel.update msAction 
+        |> MultSel.update msAction
         |> (flip mergeNewSelectables) linkedSels
 
 
-{-| merge a list of (new) Selectables into a list of (old) LinkedSelectable wrappers, 
+{-| merge a list of (new) Selectables into a list of (old) LinkedSeletable wrappers,
     replacing each oldLinkedSel.selectable with its matching new Selectable (the one
     with the same ID) unless no matching Selectable could be found in the list.
 -}
-mergeNewSelectables : List Sel.Model -> List LinkedSelectable -> List LinkedSelectable
+mergeNewSelectables : List Selectable.Model -> List LinkedSelectable -> List LinkedSelectable
 mergeNewSelectables newSels =
     let replaceSelIfMatchFound linkedSel =
             { linkedSel |
-                selectable = 
+                selectable =
                     ListEx.find (\s -> s.id == linkedSel.selectable.id) newSels
                         |> Maybe.withDefault linkedSel.selectable
             }
-    in 
+    in
         List.map replaceSelIfMatchFound
 
 
 {-| return only the core competencies that should be available / visible
-    for the user, given the current state of selected and deselected 
+    for the user, given the current state of selected and deselected
     position categories
 -}
 availableCompetencies : Model -> List LinkedSelectable
@@ -123,10 +117,10 @@ availableCompetencies model =
     let availableCompetencyIds =
             model.positionCategories
                 |> currentlySelected
-                |> List.concatMap Data.coreCompDependencies 
+                |> List.concatMap Model.coreCompDependencies
                 |> ListEx.dropDuplicates
     in
-        List.filter 
+        List.filter
             (\cc -> List.member cc.selectable.id availableCompetencyIds) 
             model.coreCompetencies
 
@@ -140,30 +134,21 @@ availableSkills model =
     let availableIDs parents =
             parents
                 |> currentlySelected
-                |> List.concatMap Data.skillDependencies
+                |> List.concatMap Model.skillDependencies
                 |> ListEx.dropDuplicates
-        idsFromPosCats = 
+        idsFromPosCats =
             availableIDs model.positionCategories
-        idsFromCoreComps = 
-            availableIDs model.coreCompetencies  
+        idsFromCoreComps =
+            availableIDs model.coreCompetencies
         isMemberOfBoth id =
-            List.member id idsFromPosCats && List.member id idsFromCoreComps          
-    in 
-        List.filter 
+            List.member id idsFromPosCats && List.member id idsFromCoreComps
+    in
+        List.filter
             (isMemberOfBoth << .id << .selectable)
             model.skills
 
+extractSelectables : List LinkedSelectable -> List Selectable.Model
+extractSelectables = List.map .selectable
 
-{-| Unwrap the Selectables from a list of LinkedSelectable wrappers
--}
-extractSelectables : List LinkedSelectable -> List Sel.Model
-extractSelectables =
-    List.map .selectable
-
-
-{-| from a list of LinkedSelectables,
-    return only those that are currently selected
--}
 currentlySelected : List LinkedSelectable -> List LinkedSelectable
-currentlySelected =
-    List.filter (.isSelected << .selectable)
+currentlySelected = List.filter (.isSelected << .selectable)
