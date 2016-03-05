@@ -1,5 +1,5 @@
-module 
-    Selectable 
+module
+    Selectable
         ( Model
         , init
         , Action
@@ -11,7 +11,7 @@ module
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Html.Events as Evnt 
+import Html.Events as Evnt
 import String
 
 
@@ -41,7 +41,7 @@ type Action
 
 update : Action -> Model -> Model
 update action model =
-    case action of 
+    case action of
         Toggle ->
             { model |
                 isSelected = not model.isSelected
@@ -54,19 +54,17 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-    let allCapsIfSelected =
-            if model.isSelected
-                then String.reverse << String.toUpper
-                else identity
-        classSuffix =
-            if model.isSelected
-                then "on"
-                else "off"
-    in
-        Html.button
-            [ Evnt.onClick
-                (Signal.forwardTo address (\_ -> Toggle))
-                NoOp
-            , Attr.class ("selectable-" ++ classSuffix)
-            ]
-            [ Html.text (model.name |> allCapsIfSelected) ]
+  let allCapsIfSelected =
+    if model.isSelected
+      then String.reverse << String.toUpper
+      else identity
+      classSuffix =
+    if model.isSelected
+      then "on"
+      else "off"
+  in
+    Html.button
+      [ Evnt.onClick (Signal.forwardTo address (\_ -> Toggle)) NoOp
+      , Attr.class ("selectable-" ++ classSuffix)
+      ]
+      [ Html.text (model.name |> allCapsIfSelected) ]

@@ -1,29 +1,10 @@
-module Data (Model, CoreCompetency, PositionCategory, data, parseJson) where
-
-import MultiSelect
+module JsonParser (parseJson) where
 import Selectable
+import Model exposing (PositionCategory, CoreCompetency, Model)
 import Json.Decode as Decode exposing (Decoder, (:=))
 
--- Data Models
-type alias Model =
-  { positionCategories : List PositionCategory
-  , coreCompetencies : List CoreCompetency
-  }
-
-type alias PositionCategory =
-  { selectable : Selectable.Model
-  , coreCompetencyIds : List ID
-  }
-
-type alias CoreCompetency =
-  { selectable : Selectable.Model
-  }
-
-type alias ID = Int
-
-
 -- JSON parsing
-json = """
+exampleJsonString = """
   {
     "positionCategories": [
       {"name": "Front End", "id": 1, "coreCompetencyIds":[1,2]},
@@ -36,9 +17,6 @@ json = """
    ]
  }
 """
-
-data : Model
-data = parseJson json
 
 parseJson : String -> Model
 parseJson json =
@@ -63,4 +41,4 @@ coreCompDecoder : Decoder CoreCompetency
 coreCompDecoder = Decode.object1 CoreCompetency selectableDecoder
 
 selectableDecoder : Decoder Selectable.Model
-selectableDecoder = Decode.object2 (\id n -> Selectable.init id n False) ("id" := Decode.int) ("name" := Decode.string) 
+selectableDecoder = Decode.object2 (\id n -> Selectable.init id n False) ("id" := Decode.int) ("name" := Decode.string)

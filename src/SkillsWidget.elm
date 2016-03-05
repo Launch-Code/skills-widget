@@ -1,26 +1,25 @@
 module SkillsWidget where
 
+import Model exposing (Model, PositionCategory, CoreCompetency)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Dict exposing (Dict)
 import List.Extra as ListEx
 import StartApp.Simple as StartApp
-
-import Selectable as Sel
 import MultiSelect as MultSel
-import Data exposing (Model, CoreCompetency, PositionCategory)
+import JsonParser
 
+-- Initialization
 main : Signal Html
 main =
   StartApp.start
-    { model = Data.parseJson jsonData
+    { model = JsonParser.parseJson jsonData
     , update = update
     , view = view
     }
 
 port jsonData : String
 
-type alias ID = Int
 
 -- UPDATE
 
