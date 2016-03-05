@@ -14,7 +14,7 @@ import Data exposing (Model, LinkedSelectable)
 main : Signal Html
 main =
   StartApp.start
-    { model = data
+    { model = Data.data
     , update = update
     , view = view
     }
@@ -22,8 +22,7 @@ main =
 
 -- MODEL
 
-data : Model
-data = Data.data
+--port jsonData : String
 
 type alias ID = Int
 
@@ -55,6 +54,7 @@ update action model =
                     updateLinkedSels msAction model.skills
             }
 
+
 -- VIEW
 
 view : Signal.Address Action -> Model -> Html
@@ -80,7 +80,6 @@ multiSelectView msAddress msModel msName =
         [ Html.h3 [] [ Html.text msName ]
         , MultSel.view msAddress msModel
         ]
-
 
 
 ------------------------
@@ -123,7 +122,7 @@ availableCompetencies : Model -> List LinkedSelectable
 availableCompetencies model =
     let availableCompetencyIds =
             model.positionCategories
-                |> List.filter (.isSelected << .selectable)
+                |> currentlySelected
                 |> List.concatMap Data.coreCompDependencies 
                 |> ListEx.dropDuplicates
     in
@@ -132,6 +131,10 @@ availableCompetencies model =
             model.coreCompetencies
 
 
+{-| return only the skills that should be available / visible
+    for the user, given the current state of selected and deselected 
+    position categories and core competencies
+-}
 availableSkills : Model -> List LinkedSelectable
 availableSkills model =
     let availableIDs parents =
@@ -150,6 +153,7 @@ availableSkills model =
             (isMemberOfBoth << .id << .selectable)
             model.skills
 
+
 {-| Unwrap the Selectables from a list of LinkedSelectable wrappers
 -}
 extractSelectables : List LinkedSelectable -> List Sel.Model
@@ -157,6 +161,9 @@ extractSelectables =
     List.map .selectable
 
 
+{-| from a list of LinkedSelectables,
+    return only those that are currently selected
+-}
 currentlySelected : List LinkedSelectable -> List LinkedSelectable
 currentlySelected =
     List.filter (.isSelected << .selectable)

@@ -10879,9 +10879,9 @@ Elm.Selectable.make = function (_elm) {
    var Toggle = {ctor: "Toggle"};
    var view = F2(function (address,model) {
       var classSuffix = model.isSelected ? "on" : "off";
-      var allCapsIfSelected = model.isSelected ? $String.toUpper : $Basics.identity;
+      var allCapsIfSelected = model.isSelected ? function (_p1) {    return $String.reverse($String.toUpper(_p1));} : $Basics.identity;
       return A2($Html.button,
-      _U.list([A2($Html$Events.onClick,A2($Signal.forwardTo,address,function (_p1) {    return Toggle;}),NoOp)
+      _U.list([A2($Html$Events.onClick,A2($Signal.forwardTo,address,function (_p2) {    return Toggle;}),NoOp)
               ,$Html$Attributes.$class(A2($Basics._op["++"],"selectable-",classSuffix))]),
       _U.list([$Html.text(allCapsIfSelected(model.name))]));
    });
@@ -10955,7 +10955,7 @@ Elm.Data.make = function (_elm) {
          }
    };
    var data = parseJson(json);
-   return _elm.Data.values = {_op: _op,data: data,Model: Model,CoreCompetency: CoreCompetency,PositionCategory: PositionCategory};
+   return _elm.Data.values = {_op: _op,data: data,parseJson: parseJson,Model: Model,CoreCompetency: CoreCompetency,PositionCategory: PositionCategory};
 };
 Elm.SkillsWidget = Elm.SkillsWidget || {};
 Elm.SkillsWidget.make = function (_elm) {
@@ -11018,7 +11018,12 @@ Elm.SkillsWidget.make = function (_elm) {
       _U.list([A3(multiSelectView,forwardTo(PosCats),toSelectable(model.positionCategories),"Position Categories")
               ,A3(multiSelectView,forwardTo(CoreComps),toSelectable(availableCompetencies(model)),"Core Competencies")]));
    });
-   var main = $StartApp$Simple.start({model: data,update: update,view: view});
+   var jsonData = Elm.Native.Port.make(_elm).inbound("jsonData",
+   "String",
+   function (v) {
+      return typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",v);
+   });
+   var main = $StartApp$Simple.start({model: $Data.parseJson(jsonData),update: update,view: view});
    return _elm.SkillsWidget.values = {_op: _op
                                      ,main: main
                                      ,PosCats: PosCats

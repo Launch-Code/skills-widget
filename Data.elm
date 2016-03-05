@@ -1,12 +1,13 @@
 module 
-  Data 
-    ( Model
-    , LinkedSelectable
-    , data
-    , coreCompDependencies
-    , skillDependencies
-    ) 
-  where
+    Data 
+        ( Model
+        , LinkedSelectable
+        , data
+        , parseJson
+        , coreCompDependencies
+        , skillDependencies
+        ) 
+    where
 
 import MultiSelect
 import Selectable
@@ -78,13 +79,7 @@ data =
 parseJson : String -> Model
 parseJson json =
     Decode.decodeString modelDecoder json
-        |> (\result ->
-                case result of
-                    Ok m -> m
-                    Err e ->
-                        let _ = Debug.log "parse error" e in
-                            Model [] [] []
-            )
+        |> Result.withDefault (Model [] [] [])
 
 
 modelDecoder : Decoder Model

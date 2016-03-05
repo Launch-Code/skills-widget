@@ -10879,9 +10879,9 @@ Elm.Selectable.make = function (_elm) {
    var Toggle = {ctor: "Toggle"};
    var view = F2(function (address,model) {
       var classSuffix = model.isSelected ? "on" : "off";
-      var allCapsIfSelected = model.isSelected ? $String.toUpper : $Basics.identity;
+      var allCapsIfSelected = model.isSelected ? function (_p1) {    return $String.reverse($String.toUpper(_p1));} : $Basics.identity;
       return A2($Html.button,
-      _U.list([A2($Html$Events.onClick,A2($Signal.forwardTo,address,function (_p1) {    return Toggle;}),NoOp)
+      _U.list([A2($Html$Events.onClick,A2($Signal.forwardTo,address,function (_p2) {    return Toggle;}),NoOp)
               ,$Html$Attributes.$class(A2($Basics._op["++"],"selectable-",classSuffix))]),
       _U.list([$Html.text(allCapsIfSelected(model.name))]));
    });
@@ -10972,19 +10972,12 @@ Elm.Data.make = function (_elm) {
    var Model = F3(function (a,b,c) {    return {positionCategories: a,coreCompetencies: b,skills: c};});
    var modelDecoder = A4($Json$Decode.object3,Model,posCatsDecoder,coreCompsDecoder,skillsDecoder);
    var parseJson = function (json) {
-      return function (result) {
-         var _p2 = result;
-         if (_p2.ctor === "Ok") {
-               return _p2._0;
-            } else {
-               var _p3 = A2($Debug.log,"parse error",_p2._0);
-               return A3(Model,_U.list([]),_U.list([]),_U.list([]));
-            }
-      }(A2($Json$Decode.decodeString,modelDecoder,json));
+      return A2($Result.withDefault,A3(Model,_U.list([]),_U.list([]),_U.list([])),A2($Json$Decode.decodeString,modelDecoder,json));
    };
    var data = parseJson(json);
    return _elm.Data.values = {_op: _op
                              ,data: data
+                             ,parseJson: parseJson
                              ,coreCompDependencies: coreCompDependencies
                              ,skillDependencies: skillDependencies
                              ,Model: Model
@@ -11023,15 +11016,7 @@ Elm.SkillsWidget.make = function (_elm) {
       model.skills);
    };
    var availableCompetencies = function (model) {
-      var availableCompetencyIds = $List$Extra.dropDuplicates(A2($List.concatMap,
-      $Data.coreCompDependencies,
-      A2($List.filter,
-      function (_p2) {
-         return function (_) {
-            return _.isSelected;
-         }(function (_) {    return _.selectable;}(_p2));
-      },
-      model.positionCategories)));
+      var availableCompetencyIds = $List$Extra.dropDuplicates(A2($List.concatMap,$Data.coreCompDependencies,currentlySelected(model.positionCategories)));
       return A2($List.filter,function (cc) {    return A2($List.member,cc.selectable.id,availableCompetencyIds);},model.coreCompetencies);
    };
    var mergeNewSelectables = function (newSels) {
@@ -11048,11 +11033,11 @@ Elm.SkillsWidget.make = function (_elm) {
       return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
    });
    var update = F2(function (action,model) {
-      var _p3 = action;
-      switch (_p3.ctor)
-      {case "PosCats": return _U.update(model,{positionCategories: A2(updateLinkedSels,_p3._0,model.positionCategories)});
-         case "CoreComps": return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p3._0,model.coreCompetencies)});
-         default: return _U.update(model,{skills: A2(updateLinkedSels,_p3._0,model.skills)});}
+      var _p2 = action;
+      switch (_p2.ctor)
+      {case "PosCats": return _U.update(model,{positionCategories: A2(updateLinkedSels,_p2._0,model.positionCategories)});
+         case "CoreComps": return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p2._0,model.coreCompetencies)});
+         default: return _U.update(model,{skills: A2(updateLinkedSels,_p2._0,model.skills)});}
    });
    var Skills = function (a) {    return {ctor: "Skills",_0: a};};
    var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
@@ -11064,11 +11049,9 @@ Elm.SkillsWidget.make = function (_elm) {
               ,A3(multiSelectView,A2($Signal.forwardTo,address,CoreComps),extractSelectables(availableCompetencies(model)),"Core Competencies")
               ,A3(multiSelectView,A2($Signal.forwardTo,address,Skills),extractSelectables(availableSkills(model)),"Skills")]));
    });
-   var data = $Data.data;
-   var main = $StartApp$Simple.start({model: data,update: update,view: view});
+   var main = $StartApp$Simple.start({model: $Data.data,update: update,view: view});
    return _elm.SkillsWidget.values = {_op: _op
                                      ,main: main
-                                     ,data: data
                                      ,PosCats: PosCats
                                      ,CoreComps: CoreComps
                                      ,Skills: Skills
