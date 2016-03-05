@@ -10885,7 +10885,7 @@ Elm.Selectable.make = function (_elm) {
               ,$Html$Attributes.$class(A2($Basics._op["++"],"selectable-",classSuffix))]),
       _U.list([$Html.text(allCapsIfSelected(model.name))]));
    });
-   var Model = F2(function (a,b) {    return {name: a,isSelected: b};});
+   var Model = F3(function (a,b,c) {    return {id: a,name: b,isSelected: c};});
    var init = Model;
    return _elm.Selectable.values = {_op: _op,init: init,update: update,view: view,Model: Model};
 };
@@ -10895,60 +10895,62 @@ Elm.MultiSelect.make = function (_elm) {
    _elm.MultiSelect = _elm.MultiSelect || {};
    if (_elm.MultiSelect.values) return _elm.MultiSelect.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
-   $List$Extra = Elm.List.Extra.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Selectable = Elm.Selectable.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var indexedList = function (xs) {
-      var length = function (_p0) {    return $Array.length($Array.fromList(_p0));}(xs);
-      return A2($List$Extra.zip,_U.range(0,length - 1),xs);
-   };
    var update = F2(function (action,model) {
-      var _p1 = action;
-      if (_p1.ctor === "Selectable") {
-            var updateItem = function (_p2) {
-               var _p3 = _p2;
-               var _p5 = _p3._1;
-               var _p4 = _p3._0;
-               return A2(F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}),
-               _p4,
-               _U.eq(_p4,_p1._0) ? _U.update(_p5,{selectable: A2($Selectable.update,_p1._1,_p5.selectable)}) : _p5);
-            };
-            return _U.update(model,{items: A2($List.map,updateItem,model.items)});
-         } else {
-            return model;
-         }
+      var _p0 = action;
+      var updateItem = function (sel) {    return _U.eq(sel.id,_p0._0) ? A2($Selectable.update,_p0._1,sel) : sel;};
+      return A2($List.map,updateItem,model);
    });
-   var NoOp = {ctor: "NoOp"};
    var Selectable = F2(function (a,b) {    return {ctor: "Selectable",_0: a,_1: b};});
-   var itemView = F2(function (address,_p6) {
-      var _p7 = _p6;
-      return A2($Selectable.view,A2($Signal.forwardTo,address,Selectable(_p7._0)),_p7._1.selectable);
-   });
-   var view = F2(function (address,model) {
-      var onlyVisibles = $List.filter(function (_p8) {    var _p9 = _p8;return _p9._1.isVisible;});
-      return A2($Html.div,_U.list([]),A2($List.map,itemView(address),onlyVisibles(model.items)));
-   });
-   var Model = function (a) {    return {items: a};};
-   var initWithShowHides = function (showHides) {    return Model(indexedList(showHides));};
-   var initWithIDs = Model;
-   var SelectableShowHide = F2(function (a,b) {    return {selectable: a,isVisible: b};});
-   var init = function (selectables) {    return Model(indexedList(A2($List.map,function (i) {    return A2(SelectableShowHide,i,true);},selectables)));};
-   return _elm.MultiSelect.values = {_op: _op
-                                    ,init: init
-                                    ,initWithShowHides: initWithShowHides
-                                    ,initWithIDs: initWithIDs
-                                    ,update: update
-                                    ,view: view
-                                    ,SelectableShowHide: SelectableShowHide
-                                    ,Model: Model};
+   var itemView = F2(function (address,selectable) {    return A2($Selectable.view,A2($Signal.forwardTo,address,Selectable(selectable.id)),selectable);});
+   var view = F2(function (address,model) {    return A2($Html.div,_U.list([]),A2($List.map,itemView(address),model));});
+   var init = function (selModel) {    return selModel;};
+   return _elm.MultiSelect.values = {_op: _op,init: init,update: update,view: view};
+};
+Elm.Data = Elm.Data || {};
+Elm.Data.make = function (_elm) {
+   "use strict";
+   _elm.Data = _elm.Data || {};
+   if (_elm.Data.values) return _elm.Data.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Selectable = Elm.Selectable.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var coreCompDependencies = function (linkedSel) {
+      var _p0 = linkedSel.dependents;
+      if (_p0.ctor === "PositionCategory") {
+            return _p0._0;
+         } else {
+            return _U.list([]);
+         }
+   };
+   var CoreCompetency = {ctor: "CoreCompetency"};
+   var PositionCategory = function (a) {    return {ctor: "PositionCategory",_0: a};};
+   var LinkedSelectable = F2(function (a,b) {    return {selectable: a,dependents: b};});
+   var Model = F2(function (a,b) {    return {positionCategories: a,coreCompetencies: b};});
+   var data = A2(Model,
+   A3($List.map2,
+   LinkedSelectable,
+   _U.list([A3($Selectable.init,1,"Front End",false),A3($Selectable.init,2,"Back End",false)]),
+   _U.list([PositionCategory(_U.list([1,2])),PositionCategory(_U.list([1,3]))])),
+   A3($List.map2,
+   LinkedSelectable,
+   _U.list([A3($Selectable.init,1,"Javascript",false),A3($Selectable.init,2,"Html/CSS",false),A3($Selectable.init,3,"Python",false)]),
+   A2($List.repeat,3,CoreCompetency)));
+   return _elm.Data.values = {_op: _op,data: data,coreCompDependencies: coreCompDependencies,Model: Model,LinkedSelectable: LinkedSelectable};
 };
 Elm.SkillsWidget = Elm.SkillsWidget || {};
 Elm.SkillsWidget.make = function (_elm) {
@@ -10957,87 +10959,73 @@ Elm.SkillsWidget.make = function (_elm) {
    if (_elm.SkillsWidget.values) return _elm.SkillsWidget.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $MultiSelect = Elm.MultiSelect.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Selectable = Elm.Selectable.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var unwrapSelectables = function (msModel) {
-      return A2($List.map,function (_p0) {    return function (_) {    return _.selectable;}($Basics.snd(_p0));},msModel.items);
-   };
-   var coreCompDependencies = $Dict.fromList(_U.list([{ctor: "_Tuple2",_0: "Web",_1: _U.list(["Java","Javascript","Elm"])}
-                                                     ,{ctor: "_Tuple2",_0: "Software",_1: _U.list(["Java"])}
-                                                     ,{ctor: "_Tuple2",_0: "LulzSec",_1: _U.list(["Java","Elm"])}]));
-   var coreCompChildren = function (posCatNames) {
-      return A2($List.concatMap,function (pcName) {    return A2($Maybe.withDefault,_U.list([]),A2($Dict.get,pcName,coreCompDependencies));},posCatNames);
-   };
-   var updateCoreComps = F2(function (posCats,oldCoreComps) {
-      var selectedPosCatNames = A2($List.map,
-      function (_) {
-         return _.name;
-      },
-      A2($List.filter,function (_) {    return _.isSelected;},unwrapSelectables(posCats)));
-      var availableCCNames = coreCompChildren(selectedPosCatNames);
-      return $MultiSelect.initWithShowHides(A2($List.map,
-      function (_p1) {
-         var _p2 = _p1;
-         var _p3 = _p2._1;
-         return _U.update(_p3,{isVisible: A2($List.member,_p3.selectable.name,availableCCNames)});
-      },
-      oldCoreComps.items));
-   });
-   var multiSelectView = F3(function (msAddress,msModel,msName) {
-      return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
-   });
-   var update = F2(function (action,model) {
-      var _p4 = action;
-      if (_p4.ctor === "PosCats") {
-            var newPosCats = A2($MultiSelect.update,_p4._0,model.positionCategories);
-            return _U.update(model,{positionCategories: newPosCats,coreCompetencies: A2(updateCoreComps,newPosCats,model.coreCompetencies)});
-         } else {
-            return _U.update(model,{coreCompetencies: A2($MultiSelect.update,_p4._0,model.coreCompetencies)});
-         }
-   });
-   var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
-   var PosCats = function (a) {    return {ctor: "PosCats",_0: a};};
-   var view = F2(function (address,_p5) {
-      var _p6 = _p5;
-      var forwardTo = $Signal.forwardTo(address);
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A3(multiSelectView,forwardTo(PosCats),_p6.positionCategories,"Position Categories")
-              ,A3(multiSelectView,forwardTo(CoreComps),_p6.coreCompetencies,"Core Cometencies")]));
-   });
-   var Model = F2(function (a,b) {    return {positionCategories: a,coreCompetencies: b};});
-   var init = F2(function (posCatsMS,coreCompsMS) {    return A2(Model,posCatsMS,coreCompsMS);});
-   return _elm.SkillsWidget.values = {_op: _op,init: init,update: update,view: view,Model: Model};
-};
-Elm.Main = Elm.Main || {};
-Elm.Main.make = function (_elm) {
-   "use strict";
-   _elm.Main = _elm.Main || {};
-   if (_elm.Main.values) return _elm.Main.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
+   $Data = Elm.Data.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
+   $List$Extra = Elm.List.Extra.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $MultiSelect = Elm.MultiSelect.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Selectable = Elm.Selectable.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $SkillsWidget = Elm.SkillsWidget.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
-   var ccNames = A3($List.map2,$Selectable.init,_U.list(["Java","Javascript","Elm"]),_U.list([true,false,true]));
-   var pcNames = A3($List.map2,$Selectable.init,_U.list(["Web","Software","LulzSec"]),_U.list([false,true,true]));
-   var data = A2($SkillsWidget.init,$MultiSelect.init(pcNames),$MultiSelect.init(ccNames));
-   var main = $StartApp$Simple.start({model: data,update: $SkillsWidget.update,view: $SkillsWidget.view});
-   return _elm.Main.values = {_op: _op,main: main,data: data,pcNames: pcNames,ccNames: ccNames};
+   var extractSelectables = $List.map(function (_) {    return _.selectable;});
+   var availableCompetencies = function (model) {
+      var availableCompetencyIds = $List$Extra.dropDuplicates(A2($List.concatMap,
+      $Data.coreCompDependencies,
+      A2($List.filter,
+      function (_p0) {
+         return function (_) {
+            return _.isSelected;
+         }(function (_) {    return _.selectable;}(_p0));
+      },
+      model.positionCategories)));
+      return A2($List.filter,function (cc) {    return A2($List.member,cc.selectable.id,availableCompetencyIds);},model.coreCompetencies);
+   };
+   var mergeNewSelectables = F2(function (newSels,oldLinkedSels) {
+      return A2($List.map,
+      function (linkedSel) {
+         return _U.update(linkedSel,
+         {selectable: A2($Maybe.withDefault,linkedSel.selectable,A2($List$Extra.find,function (s) {    return _U.eq(s.id,linkedSel.selectable.id);},newSels))});
+      },
+      oldLinkedSels);
+   });
+   var updateLinkedSels = F2(function (msAction,linkedSels) {
+      return A3($Basics.flip,mergeNewSelectables,linkedSels,A2($MultiSelect.update,msAction,extractSelectables(linkedSels)));
+   });
+   var multiSelectView = F3(function (msAddress,msModel,msName) {
+      return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
+   });
+   var update = F2(function (action,model) {
+      var _p1 = action;
+      if (_p1.ctor === "PosCats") {
+            return _U.update(model,{positionCategories: A2(updateLinkedSels,_p1._0,model.positionCategories)});
+         } else {
+            return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p1._0,model.coreCompetencies)});
+         }
+   });
+   var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
+   var PosCats = function (a) {    return {ctor: "PosCats",_0: a};};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A3(multiSelectView,A2($Signal.forwardTo,address,PosCats),extractSelectables(model.positionCategories),"Position Categories")
+              ,A3(multiSelectView,A2($Signal.forwardTo,address,CoreComps),extractSelectables(availableCompetencies(model)),"Core Competencies")]));
+   });
+   var data = $Data.data;
+   var main = $StartApp$Simple.start({model: data,update: update,view: view});
+   return _elm.SkillsWidget.values = {_op: _op
+                                     ,main: main
+                                     ,data: data
+                                     ,PosCats: PosCats
+                                     ,CoreComps: CoreComps
+                                     ,update: update
+                                     ,view: view
+                                     ,multiSelectView: multiSelectView
+                                     ,updateLinkedSels: updateLinkedSels
+                                     ,mergeNewSelectables: mergeNewSelectables
+                                     ,availableCompetencies: availableCompetencies
+                                     ,extractSelectables: extractSelectables};
 };
