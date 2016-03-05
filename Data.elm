@@ -1,4 +1,4 @@
-module Data (Model, CoreCompetency, PositionCategory, data) where
+module Data (Model, CoreCompetency, PositionCategory, data, parseJson) where
 
 import MultiSelect
 import Selectable

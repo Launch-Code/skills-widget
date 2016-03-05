@@ -56,7 +56,7 @@ view : Signal.Address Action -> Model -> Html
 view address model =
     let allCapsIfSelected =
             if model.isSelected
-                then String.toUpper
+                then String.reverse << String.toUpper
                 else identity
         classSuffix =
             if model.isSelected
