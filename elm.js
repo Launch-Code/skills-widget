@@ -10923,6 +10923,7 @@ Elm.Data.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
@@ -10937,19 +10938,32 @@ Elm.Data.make = function (_elm) {
             return _U.list([]);
          }
    };
+   var selectableDecoder = A3($Json$Decode.object2,
+   F2(function (id,n) {    return A3($Selectable.init,id,n,false);}),
+   A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
+   A2($Json$Decode._op[":="],"name",$Json$Decode.string));
+   var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1},\n            {\"name\": \"Html/CSS\", \"id\": 2},\n            {\"name\": \"Python\", \"id\": 3}\n        ]\n    }\n    ";
    var CoreCompetency = {ctor: "CoreCompetency"};
    var PositionCategory = function (a) {    return {ctor: "PositionCategory",_0: a};};
    var LinkedSelectable = F2(function (a,b) {    return {selectable: a,dependents: b};});
+   var posCatDecoder = A3($Json$Decode.object2,
+   F2(function (s,ccIDs) {    return A2(LinkedSelectable,s,PositionCategory(ccIDs));}),
+   selectableDecoder,
+   A2($Json$Decode._op[":="],"coreCompetencyIds",$Json$Decode.list($Json$Decode.$int)));
+   var posCatsDecoder = A2($Json$Decode._op[":="],"positionCategories",$Json$Decode.list(posCatDecoder));
+   var coreCompDecoder = A2($Json$Decode.object1,function (s) {    return A2(LinkedSelectable,s,CoreCompetency);},selectableDecoder);
+   var coreCompsDecoder = A2($Json$Decode._op[":="],"coreCompetencies",$Json$Decode.list(coreCompDecoder));
    var Model = F2(function (a,b) {    return {positionCategories: a,coreCompetencies: b};});
-   var data = A2(Model,
-   A3($List.map2,
-   LinkedSelectable,
-   _U.list([A3($Selectable.init,1,"Front End",false),A3($Selectable.init,2,"Back End",false)]),
-   _U.list([PositionCategory(_U.list([1,2])),PositionCategory(_U.list([1,3]))])),
-   A3($List.map2,
-   LinkedSelectable,
-   _U.list([A3($Selectable.init,1,"Javascript",false),A3($Selectable.init,2,"Html/CSS",false),A3($Selectable.init,3,"Python",false)]),
-   A2($List.repeat,3,CoreCompetency)));
+   var modelDecoder = A3($Json$Decode.object2,Model,posCatsDecoder,coreCompsDecoder);
+   var parseJson = function (json) {
+      var _p1 = A2($Json$Decode.decodeString,modelDecoder,json);
+      if (_p1.ctor === "Ok") {
+            return _p1._0;
+         } else {
+            return {positionCategories: _U.list([]),coreCompetencies: _U.list([])};
+         }
+   };
+   var data = parseJson(json);
    return _elm.Data.values = {_op: _op,data: data,coreCompDependencies: coreCompDependencies,Model: Model,LinkedSelectable: LinkedSelectable};
 };
 Elm.SkillsWidget = Elm.SkillsWidget || {};
