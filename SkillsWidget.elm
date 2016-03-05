@@ -33,6 +33,7 @@ type alias ID = Int
 type Action
     = PosCats MultSel.Action
     | CoreComps MultSel.Action
+    | Skills MultSel.Action
 
 
 update : Action -> Model -> Model
@@ -48,7 +49,11 @@ update action model =
                 coreCompetencies =
                     updateLinkedSels msAction model.coreCompetencies          
             }
-
+        Skills msAction ->
+            { model |
+                skills =
+                    updateLinkedSels msAction model.skills
+            }
 
 -- VIEW
 
@@ -63,6 +68,10 @@ view address model =
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
             "Core Competencies"
+        , multiSelectView
+            (Signal.forwardTo address Skills)
+            (extractSelectables <| availableSkills model)
+            "Skills"
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
@@ -123,8 +132,31 @@ availableCompetencies model =
             model.coreCompetencies
 
 
+availableSkills : Model -> List LinkedSelectable
+availableSkills model =
+    let availableIDs parents =
+            parents
+                |> currentlySelected
+                |> List.concatMap Data.skillDependencies
+                |> ListEx.dropDuplicates
+        idsFromPosCats = 
+            availableIDs model.positionCategories
+        idsFromCoreComps = 
+            availableIDs model.coreCompetencies  
+        isMemberOfBoth id =
+            List.member id idsFromPosCats && List.member id idsFromCoreComps          
+    in 
+        List.filter 
+            (isMemberOfBoth << .id << .selectable)
+            model.skills
+
 {-| Unwrap the Selectables from a list of LinkedSelectable wrappers
 -}
 extractSelectables : List LinkedSelectable -> List Sel.Model
 extractSelectables =
     List.map .selectable
+
+
+currentlySelected : List LinkedSelectable -> List LinkedSelectable
+currentlySelected =
+    List.filter (.isSelected << .selectable)

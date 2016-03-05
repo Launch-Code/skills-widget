@@ -4,6 +4,7 @@ module
     , LinkedSelectable
     , data
     , coreCompDependencies
+    , skillDependencies
     ) 
   where
 
@@ -53,15 +54,20 @@ json =
     """
     {
         "positionCategories": [
-            {"name": "Front End", "id": 1, "coreCompetencyIds":[1,2], "skillIds":[]},
-            {"name": "Back End", "id": 2, "coreCompetencyIds":[1,3], "skillIds":[]}
+            {"name": "Front End", "id": 1, "coreCompetencyIds":[1,2], "skillIds":[1, 3]},
+            {"name": "Back End", "id": 2, "coreCompetencyIds":[1,3], "skillIds":[2, 4]}
         ],
         "coreCompetencies": [
-            {"name": "Javascript", "id": 1, "skillIds":[]},
-            {"name": "Html/CSS", "id": 2, "skillIds":[]},
-            {"name": "Python", "id": 3, "skillIds":[]}
+            {"name": "Javascript", "id": 1, "skillIds":[1, 2]},
+            {"name": "Html/CSS", "id": 2, "skillIds":[3]},
+            {"name": "Python", "id": 3, "skillIds":[4]}
         ],
-        "skills": []
+        "skills": [
+            {"name": "jQuery", "id": 1},
+            {"name": "Node.js", "id": 2},
+            {"name": "Bootstrap", "id": 3},
+            {"name": "Django", "id": 4}
+        ]
     }
     """
 
@@ -136,7 +142,12 @@ selectableDecoder =
 coreCompDependencies : LinkedSelectable -> List ID 
 coreCompDependencies linkedSel =
     case linkedSel.dependents of 
-        PositionCategory coreCompIDs _ ->
-            coreCompIDs 
-        _ ->
-            []
+        PositionCategory coreCompIDs _ -> coreCompIDs 
+        _ -> []
+
+skillDependencies : LinkedSelectable -> List ID
+skillDependencies linkedSel =
+    case linkedSel.dependents of
+        PositionCategory _ skillIDs -> skillIDs
+        CoreCompetency skillIDs -> skillIDs
+        _ -> []

@@ -10930,10 +10930,17 @@ Elm.Data.make = function (_elm) {
    $Selectable = Elm.Selectable.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var coreCompDependencies = function (linkedSel) {
+   var skillDependencies = function (linkedSel) {
       var _p0 = linkedSel.dependents;
-      if (_p0.ctor === "PositionCategory") {
-            return _p0._0;
+      switch (_p0.ctor)
+      {case "PositionCategory": return _p0._1;
+         case "CoreCompetency": return _p0._0;
+         default: return _U.list([]);}
+   };
+   var coreCompDependencies = function (linkedSel) {
+      var _p1 = linkedSel.dependents;
+      if (_p1.ctor === "PositionCategory") {
+            return _p1._0;
          } else {
             return _U.list([]);
          }
@@ -10942,7 +10949,7 @@ Elm.Data.make = function (_elm) {
    F2(function (id,n) {    return A3($Selectable.init,id,n,false);}),
    A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
    A2($Json$Decode._op[":="],"name",$Json$Decode.string));
-   var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2], \"skillIds\":[]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3], \"skillIds\":[]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1, \"skillIds\":[]},\n            {\"name\": \"Html/CSS\", \"id\": 2, \"skillIds\":[]},\n            {\"name\": \"Python\", \"id\": 3, \"skillIds\":[]}\n        ],\n        \"skills\": []\n    }\n    ";
+   var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2], \"skillIds\":[1, 3]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3], \"skillIds\":[2, 4]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1, \"skillIds\":[1, 2]},\n            {\"name\": \"Html/CSS\", \"id\": 2, \"skillIds\":[3]},\n            {\"name\": \"Python\", \"id\": 3, \"skillIds\":[4]}\n        ],\n        \"skills\": [\n            {\"name\": \"jQuery\", \"id\": 1},\n            {\"name\": \"Node.js\", \"id\": 2},\n            {\"name\": \"Bootstrap\", \"id\": 3},\n            {\"name\": \"Django\", \"id\": 4}\n        ]\n    }\n    ";
    var Skill = {ctor: "Skill"};
    var CoreCompetency = function (a) {    return {ctor: "CoreCompetency",_0: a};};
    var PositionCategory = F2(function (a,b) {    return {ctor: "PositionCategory",_0: a,_1: b};});
@@ -10966,17 +10973,22 @@ Elm.Data.make = function (_elm) {
    var modelDecoder = A4($Json$Decode.object3,Model,posCatsDecoder,coreCompsDecoder,skillsDecoder);
    var parseJson = function (json) {
       return function (result) {
-         var _p1 = result;
-         if (_p1.ctor === "Ok") {
-               return _p1._0;
+         var _p2 = result;
+         if (_p2.ctor === "Ok") {
+               return _p2._0;
             } else {
-               var _p2 = A2($Debug.log,"parse error",_p1._0);
+               var _p3 = A2($Debug.log,"parse error",_p2._0);
                return A3(Model,_U.list([]),_U.list([]),_U.list([]));
             }
       }(A2($Json$Decode.decodeString,modelDecoder,json));
    };
    var data = parseJson(json);
-   return _elm.Data.values = {_op: _op,data: data,coreCompDependencies: coreCompDependencies,Model: Model,LinkedSelectable: LinkedSelectable};
+   return _elm.Data.values = {_op: _op
+                             ,data: data
+                             ,coreCompDependencies: coreCompDependencies
+                             ,skillDependencies: skillDependencies
+                             ,Model: Model
+                             ,LinkedSelectable: LinkedSelectable};
 };
 Elm.SkillsWidget = Elm.SkillsWidget || {};
 Elm.SkillsWidget.make = function (_elm) {
@@ -10997,15 +11009,27 @@ Elm.SkillsWidget.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
+   var currentlySelected = $List.filter(function (_p0) {    return function (_) {    return _.isSelected;}(function (_) {    return _.selectable;}(_p0));});
    var extractSelectables = $List.map(function (_) {    return _.selectable;});
+   var availableSkills = function (model) {
+      var availableIDs = function (parents) {    return $List$Extra.dropDuplicates(A2($List.concatMap,$Data.skillDependencies,currentlySelected(parents)));};
+      var idsFromPosCats = availableIDs(model.positionCategories);
+      var idsFromCoreComps = availableIDs(model.coreCompetencies);
+      var isMemberOfBoth = function (id) {    return A2($List.member,id,idsFromPosCats) && A2($List.member,id,idsFromCoreComps);};
+      return A2($List.filter,
+      function (_p1) {
+         return isMemberOfBoth(function (_) {    return _.id;}(function (_) {    return _.selectable;}(_p1)));
+      },
+      model.skills);
+   };
    var availableCompetencies = function (model) {
       var availableCompetencyIds = $List$Extra.dropDuplicates(A2($List.concatMap,
       $Data.coreCompDependencies,
       A2($List.filter,
-      function (_p0) {
+      function (_p2) {
          return function (_) {
             return _.isSelected;
-         }(function (_) {    return _.selectable;}(_p0));
+         }(function (_) {    return _.selectable;}(_p2));
       },
       model.positionCategories)));
       return A2($List.filter,function (cc) {    return A2($List.member,cc.selectable.id,availableCompetencyIds);},model.coreCompetencies);
@@ -11024,20 +11048,21 @@ Elm.SkillsWidget.make = function (_elm) {
       return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
    });
    var update = F2(function (action,model) {
-      var _p1 = action;
-      if (_p1.ctor === "PosCats") {
-            return _U.update(model,{positionCategories: A2(updateLinkedSels,_p1._0,model.positionCategories)});
-         } else {
-            return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p1._0,model.coreCompetencies)});
-         }
+      var _p3 = action;
+      switch (_p3.ctor)
+      {case "PosCats": return _U.update(model,{positionCategories: A2(updateLinkedSels,_p3._0,model.positionCategories)});
+         case "CoreComps": return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p3._0,model.coreCompetencies)});
+         default: return _U.update(model,{skills: A2(updateLinkedSels,_p3._0,model.skills)});}
    });
+   var Skills = function (a) {    return {ctor: "Skills",_0: a};};
    var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
    var PosCats = function (a) {    return {ctor: "PosCats",_0: a};};
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([]),
       _U.list([A3(multiSelectView,A2($Signal.forwardTo,address,PosCats),extractSelectables(model.positionCategories),"Position Categories")
-              ,A3(multiSelectView,A2($Signal.forwardTo,address,CoreComps),extractSelectables(availableCompetencies(model)),"Core Competencies")]));
+              ,A3(multiSelectView,A2($Signal.forwardTo,address,CoreComps),extractSelectables(availableCompetencies(model)),"Core Competencies")
+              ,A3(multiSelectView,A2($Signal.forwardTo,address,Skills),extractSelectables(availableSkills(model)),"Skills")]));
    });
    var data = $Data.data;
    var main = $StartApp$Simple.start({model: data,update: update,view: view});
@@ -11046,11 +11071,14 @@ Elm.SkillsWidget.make = function (_elm) {
                                      ,data: data
                                      ,PosCats: PosCats
                                      ,CoreComps: CoreComps
+                                     ,Skills: Skills
                                      ,update: update
                                      ,view: view
                                      ,multiSelectView: multiSelectView
                                      ,updateLinkedSels: updateLinkedSels
                                      ,mergeNewSelectables: mergeNewSelectables
                                      ,availableCompetencies: availableCompetencies
-                                     ,extractSelectables: extractSelectables};
+                                     ,availableSkills: availableSkills
+                                     ,extractSelectables: extractSelectables
+                                     ,currentlySelected: currentlySelected};
 };
