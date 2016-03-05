@@ -10942,26 +10942,38 @@ Elm.Data.make = function (_elm) {
    F2(function (id,n) {    return A3($Selectable.init,id,n,false);}),
    A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
    A2($Json$Decode._op[":="],"name",$Json$Decode.string));
-   var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1},\n            {\"name\": \"Html/CSS\", \"id\": 2},\n            {\"name\": \"Python\", \"id\": 3}\n        ]\n    }\n    ";
-   var CoreCompetency = {ctor: "CoreCompetency"};
-   var PositionCategory = function (a) {    return {ctor: "PositionCategory",_0: a};};
+   var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2], \"skillIds\":[]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3], \"skillIds\":[]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1, \"skillIds\":[]},\n            {\"name\": \"Html/CSS\", \"id\": 2, \"skillIds\":[]},\n            {\"name\": \"Python\", \"id\": 3, \"skillIds\":[]}\n        ],\n        \"skills\": []\n    }\n    ";
+   var Skill = {ctor: "Skill"};
+   var CoreCompetency = function (a) {    return {ctor: "CoreCompetency",_0: a};};
+   var PositionCategory = F2(function (a,b) {    return {ctor: "PositionCategory",_0: a,_1: b};});
    var LinkedSelectable = F2(function (a,b) {    return {selectable: a,dependents: b};});
-   var posCatDecoder = A3($Json$Decode.object2,
-   F2(function (s,ccIDs) {    return A2(LinkedSelectable,s,PositionCategory(ccIDs));}),
+   var posCatDecoder = A2($Debug.log,
+   "pos cat decoder",
+   A4($Json$Decode.object3,
+   F3(function (sel,ccIDs,skillIDs) {    return A2(LinkedSelectable,sel,A2(PositionCategory,ccIDs,skillIDs));}),
    selectableDecoder,
-   A2($Json$Decode._op[":="],"coreCompetencyIds",$Json$Decode.list($Json$Decode.$int)));
+   A2($Json$Decode._op[":="],"coreCompetencyIds",$Json$Decode.list($Json$Decode.$int)),
+   A2($Json$Decode._op[":="],"skillIds",$Json$Decode.list($Json$Decode.$int))));
    var posCatsDecoder = A2($Json$Decode._op[":="],"positionCategories",$Json$Decode.list(posCatDecoder));
-   var coreCompDecoder = A2($Json$Decode.object1,function (s) {    return A2(LinkedSelectable,s,CoreCompetency);},selectableDecoder);
+   var coreCompDecoder = A3($Json$Decode.object2,
+   F2(function (sel,skillIDs) {    return A2(LinkedSelectable,sel,CoreCompetency(skillIDs));}),
+   selectableDecoder,
+   A2($Json$Decode._op[":="],"skillIds",$Json$Decode.list($Json$Decode.$int)));
    var coreCompsDecoder = A2($Json$Decode._op[":="],"coreCompetencies",$Json$Decode.list(coreCompDecoder));
-   var Model = F2(function (a,b) {    return {positionCategories: a,coreCompetencies: b};});
-   var modelDecoder = A3($Json$Decode.object2,Model,posCatsDecoder,coreCompsDecoder);
+   var skillDecoder = A2($Json$Decode.object1,function (sel) {    return A2(LinkedSelectable,sel,Skill);},selectableDecoder);
+   var skillsDecoder = A2($Json$Decode._op[":="],"skills",$Json$Decode.list(skillDecoder));
+   var Model = F3(function (a,b,c) {    return {positionCategories: a,coreCompetencies: b,skills: c};});
+   var modelDecoder = A4($Json$Decode.object3,Model,posCatsDecoder,coreCompsDecoder,skillsDecoder);
    var parseJson = function (json) {
-      var _p1 = A2($Json$Decode.decodeString,modelDecoder,json);
-      if (_p1.ctor === "Ok") {
-            return _p1._0;
-         } else {
-            return {positionCategories: _U.list([]),coreCompetencies: _U.list([])};
-         }
+      return function (result) {
+         var _p1 = result;
+         if (_p1.ctor === "Ok") {
+               return _p1._0;
+            } else {
+               var _p2 = A2($Debug.log,"parse error",_p1._0);
+               return A3(Model,_U.list([]),_U.list([]),_U.list([]));
+            }
+      }(A2($Json$Decode.decodeString,modelDecoder,json));
    };
    var data = parseJson(json);
    return _elm.Data.values = {_op: _op,data: data,coreCompDependencies: coreCompDependencies,Model: Model,LinkedSelectable: LinkedSelectable};

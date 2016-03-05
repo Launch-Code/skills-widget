@@ -10,7 +10,7 @@ module
 import MultiSelect
 import Selectable
 import Json.Decode as Decode exposing (Decoder, (:=))
-
+import Debug
 
 
 -- Data Models
@@ -18,6 +18,7 @@ import Json.Decode as Decode exposing (Decoder, (:=))
 type alias Model =
     { positionCategories : List LinkedSelectable
     , coreCompetencies : List LinkedSelectable
+    , skills : List LinkedSelectable
     }
 
 
@@ -35,8 +36,12 @@ type alias LinkedSelectable =
     whose availability should depend upon thisInstance.selectable.isSelected == True
 -}
 type Dependents
-    = PositionCategory (List ID) 
+    = PositionCategory 
+        (List ID) -- dependent core competencies
+        (List ID) -- dependent skills
     | CoreCompetency 
+        (List ID) -- dependent skills
+    | Skill 
 
 
 type alias ID = Int
@@ -48,14 +53,15 @@ json =
     """
     {
         "positionCategories": [
-            {"name": "Front End", "id": 1, "coreCompetencyIds":[1,2]},
-            {"name": "Back End", "id": 2, "coreCompetencyIds":[1,3]}
+            {"name": "Front End", "id": 1, "coreCompetencyIds":[1,2], "skillIds":[]},
+            {"name": "Back End", "id": 2, "coreCompetencyIds":[1,3], "skillIds":[]}
         ],
         "coreCompetencies": [
-            {"name": "Javascript", "id": 1},
-            {"name": "Html/CSS", "id": 2},
-            {"name": "Python", "id": 3}
-        ]
+            {"name": "Javascript", "id": 1, "skillIds":[]},
+            {"name": "Html/CSS", "id": 2, "skillIds":[]},
+            {"name": "Python", "id": 3, "skillIds":[]}
+        ],
+        "skills": []
     }
     """
 
@@ -65,38 +71,64 @@ data =
 
 parseJson : String -> Model
 parseJson json =
-    case Decode.decodeString modelDecoder json of
-        Ok m -> m
-        Err e -> 
-            { positionCategories = []
-            , coreCompetencies = []
-            }
+    Decode.decodeString modelDecoder json
+        |> (\result ->
+                case result of
+                    Ok m -> m
+                    Err e ->
+                        let _ = Debug.log "parse error" e in
+                            Model [] [] []
+            )
+
 
 modelDecoder : Decoder Model
 modelDecoder = 
-  Decode.object2 Model posCatsDecoder coreCompsDecoder
+    Decode.object3 Model posCatsDecoder coreCompsDecoder skillsDecoder
 
 posCatsDecoder : Decoder (List LinkedSelectable)
 posCatsDecoder = 
-  "positionCategories" := Decode.list posCatDecoder
+    "positionCategories" := Decode.list posCatDecoder
+
 posCatDecoder : Decoder LinkedSelectable
 posCatDecoder = 
-    Decode.object2 
-        (\s ccIDs -> LinkedSelectable s <| PositionCategory ccIDs)
+    Decode.object3 
+        (\sel ccIDs skillIDs -> 
+            LinkedSelectable sel <| PositionCategory ccIDs skillIDs
+        )
         selectableDecoder 
         ("coreCompetencyIds" := Decode.list Decode.int)
+        ("skillIds" := Decode.list Decode.int)
+        |> Debug.log "pos cat decoder"
 
 coreCompsDecoder : Decoder (List LinkedSelectable)
 coreCompsDecoder = 
-  "coreCompetencies" := Decode.list coreCompDecoder
+    "coreCompetencies" := Decode.list coreCompDecoder
+
 coreCompDecoder : Decoder LinkedSelectable
 coreCompDecoder = 
-  Decode.object1 (\s -> LinkedSelectable s CoreCompetency) selectableDecoder
+    Decode.object2 
+        (\sel skillIDs-> 
+            LinkedSelectable sel <| CoreCompetency skillIDs
+        ) 
+        selectableDecoder
+        ("skillIds" := Decode.list Decode.int)    
+
+skillsDecoder : Decoder (List LinkedSelectable)
+skillsDecoder =
+    "skills" := Decode.list skillDecoder 
+
+skillDecoder : Decoder LinkedSelectable 
+skillDecoder =
+    Decode.object1
+        (\sel -> LinkedSelectable sel Skill)    
+        selectableDecoder
 
 selectableDecoder : Decoder Selectable.Model
 selectableDecoder = 
-  Decode.object2 (\id n -> Selectable.init id n False) ("id" := Decode.int) ("name" := Decode.string) 
-
+    Decode.object2 
+        (\id n -> Selectable.init id n False)
+        ("id" := Decode.int) 
+        ("name" := Decode.string) 
 
 
 -- HELPERS
@@ -104,7 +136,7 @@ selectableDecoder =
 coreCompDependencies : LinkedSelectable -> List ID 
 coreCompDependencies linkedSel =
     case linkedSel.dependents of 
-        PositionCategory coreCompIDs ->
+        PositionCategory coreCompIDs _ ->
             coreCompIDs 
         _ ->
             []
