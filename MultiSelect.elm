@@ -9,6 +9,7 @@ module
     where
 
 import Html exposing (Html)
+import Html.Attributes as Attr
 import Html.Events as Evnt
 import List.Extra as ListEx
 import Array
@@ -52,7 +53,7 @@ update action model =
 -- VIEW
 view : Signal.Address Action -> Model -> Html
 view address model =
-  Html.div []
+  Html.div [ Attr.class "multiselect" ]
     <| List.map (itemView address) model
 
 

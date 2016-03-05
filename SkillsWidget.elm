@@ -76,7 +76,7 @@ view address model =
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
 multiSelectView msAddress msModel msName =
-    Html.div []
+    Html.div [ Attr.class "multiselect-container" ]
         [ Html.h3 [] [ Html.text msName ]
         , MultSel.view msAddress msModel
         ]
