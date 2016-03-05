@@ -10339,10 +10339,34 @@ Elm.Model.make = function (_elm) {
    $Selectable = Elm.Selectable.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var CoreCompetency = function (a) {    return {selectable: a};};
-   var PositionCategory = F2(function (a,b) {    return {selectable: a,coreCompetencyIds: b};});
-   var Model = F2(function (a,b) {    return {positionCategories: a,coreCompetencies: b};});
-   return _elm.Model.values = {_op: _op,Model: Model,PositionCategory: PositionCategory,CoreCompetency: CoreCompetency};
+   var skillDependencies = function (linkedSel) {
+      var _p0 = linkedSel.dependents;
+      switch (_p0.ctor)
+      {case "PositionCategory": return _p0._1;
+         case "CoreCompetency": return _p0._0;
+         default: return _U.list([]);}
+   };
+   var coreCompDependencies = function (linkedSel) {
+      var _p1 = linkedSel.dependents;
+      if (_p1.ctor === "PositionCategory") {
+            return _p1._0;
+         } else {
+            return _U.list([]);
+         }
+   };
+   var Skill = {ctor: "Skill"};
+   var CoreCompetency = function (a) {    return {ctor: "CoreCompetency",_0: a};};
+   var PositionCategory = F2(function (a,b) {    return {ctor: "PositionCategory",_0: a,_1: b};});
+   var LinkedSelectable = F2(function (a,b) {    return {selectable: a,dependents: b};});
+   var Model = F3(function (a,b,c) {    return {positionCategories: a,coreCompetencies: b,skills: c};});
+   return _elm.Model.values = {_op: _op
+                              ,coreCompDependencies: coreCompDependencies
+                              ,skillDependencies: skillDependencies
+                              ,Model: Model
+                              ,LinkedSelectable: LinkedSelectable
+                              ,Skill: Skill
+                              ,PositionCategory: PositionCategory
+                              ,CoreCompetency: CoreCompetency};
 };
 Elm.JsonParser = Elm.JsonParser || {};
 Elm.JsonParser.make = function (_elm) {
@@ -10364,24 +10388,29 @@ Elm.JsonParser.make = function (_elm) {
    F2(function (id,n) {    return A3($Selectable.init,id,n,false);}),
    A2($Json$Decode._op[":="],"id",$Json$Decode.$int),
    A2($Json$Decode._op[":="],"name",$Json$Decode.string));
-   var coreCompDecoder = A2($Json$Decode.object1,$Model.CoreCompetency,selectableDecoder);
-   var coreCompsDecoder = A2($Json$Decode._op[":="],"coreCompetencies",$Json$Decode.list(coreCompDecoder));
-   var posCatDecoder = A3($Json$Decode.object2,
-   $Model.PositionCategory,
+   var skillDecoder = A2($Json$Decode.object1,function (sel) {    return A2($Model.LinkedSelectable,sel,$Model.Skill);},selectableDecoder);
+   var skillsDecoder = A2($Json$Decode._op[":="],"skills",$Json$Decode.list(skillDecoder));
+   var coreCompDecoder = A3($Json$Decode.object2,
+   F2(function (sel,skillIDs) {    return A2($Model.LinkedSelectable,sel,$Model.CoreCompetency(skillIDs));}),
    selectableDecoder,
-   A2($Json$Decode._op[":="],"coreCompetencyIds",$Json$Decode.list($Json$Decode.$int)));
+   A2($Json$Decode._op[":="],"skillIds",$Json$Decode.list($Json$Decode.$int)));
+   var coreCompsDecoder = A2($Json$Decode._op[":="],"coreCompetencies",$Json$Decode.list(coreCompDecoder));
+   var posCatDecoder = A2($Debug.log,
+   "pos cat decoder",
+   A4($Json$Decode.object3,
+   F3(function (sel,ccIDs,skillIDs) {    return A2($Model.LinkedSelectable,sel,A2($Model.PositionCategory,ccIDs,skillIDs));}),
+   selectableDecoder,
+   A2($Json$Decode._op[":="],"coreCompetencyIds",$Json$Decode.list($Json$Decode.$int)),
+   A2($Json$Decode._op[":="],"skillIds",$Json$Decode.list($Json$Decode.$int))));
    var posCatsDecoder = A2($Json$Decode._op[":="],"positionCategories",$Json$Decode.list(posCatDecoder));
-   var modelDecoder = A3($Json$Decode.object2,$Model.Model,posCatsDecoder,coreCompsDecoder);
+   var modelDecoder = A4($Json$Decode.object3,$Model.Model,posCatsDecoder,coreCompsDecoder,skillsDecoder);
    var parseJson = function (json) {
-      var _p0 = A2($Json$Decode.decodeString,modelDecoder,json);
-      if (_p0.ctor === "Ok") {
-            return _p0._0;
-         } else {
-            return {positionCategories: _U.list([]),coreCompetencies: _U.list([])};
-         }
+      return A2($Result.withDefault,A3($Model.Model,_U.list([]),_U.list([]),_U.list([])),A2($Json$Decode.decodeString,modelDecoder,json));
    };
+   var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2], \"skillIds\":[1, 3]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3], \"skillIds\":[2, 4]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1, \"skillIds\":[1, 2]},\n            {\"name\": \"Html/CSS\", \"id\": 2, \"skillIds\":[3]},\n            {\"name\": \"Python\", \"id\": 3, \"skillIds\":[4]}\n        ],\n        \"skills\": [\n            {\"name\": \"jQuery\", \"id\": 1},\n            {\"name\": \"Node.js\", \"id\": 2},\n            {\"name\": \"Bootstrap\", \"id\": 3},\n            {\"name\": \"Django\", \"id\": 4}\n        ]\n    }\n    ";
+   var testData = parseJson(json);
    var exampleJsonString = "\n  {\n    \"positionCategories\": [\n      {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2]},\n      {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3]}\n   ],\n   \"coreCompetencies\": [\n     {\"name\": \"Javascript\", \"id\": 1},\n     {\"name\": \"Html/CSS\", \"id\": 2},\n     {\"name\": \"Python\", \"id\": 3}\n   ]\n }\n";
-   return _elm.JsonParser.values = {_op: _op,parseJson: parseJson};
+   return _elm.JsonParser.values = {_op: _op,parseJson: parseJson,testData: testData};
 };
 Elm.Set = Elm.Set || {};
 Elm.Set.make = function (_elm) {
@@ -10989,65 +11018,75 @@ Elm.SkillsWidget.make = function (_elm) {
    $Model = Elm.Model.make(_elm),
    $MultiSelect = Elm.MultiSelect.make(_elm),
    $Result = Elm.Result.make(_elm),
+   $Selectable = Elm.Selectable.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
-   var toSelectable = $List.map(function (_) {    return _.selectable;});
-   var mergeNewSelectables = F2(function (newSels,oldSelWrappers) {
-      return A2($List.map,
-      function (selWrapper) {
-         var maybeNewSel = A2($List$Extra.find,function (s) {    return _U.eq(s.id,selWrapper.selectable.id);},newSels);
-         var updatedSel = function () {    var _p0 = maybeNewSel;if (_p0.ctor === "Just") {    return _p0._0;} else {    return selWrapper.selectable;}}();
-         return _U.update(selWrapper,{selectable: updatedSel});
-      },
-      oldSelWrappers);
-   });
-   var availableCompetencies = function (model) {
-      var selectedPositionCategories = A2($List.filter,
+   var currentlySelected = $List.filter(function (_p0) {    return function (_) {    return _.isSelected;}(function (_) {    return _.selectable;}(_p0));});
+   var extractSelectables = $List.map(function (_) {    return _.selectable;});
+   var availableSkills = function (model) {
+      var availableIDs = function (parents) {    return $List$Extra.dropDuplicates(A2($List.concatMap,$Model.skillDependencies,currentlySelected(parents)));};
+      var idsFromPosCats = availableIDs(model.positionCategories);
+      var idsFromCoreComps = availableIDs(model.coreCompetencies);
+      var isMemberOfBoth = function (id) {    return A2($List.member,id,idsFromPosCats) && A2($List.member,id,idsFromCoreComps);};
+      return A2($List.filter,
       function (_p1) {
-         return function (_) {
-            return _.isSelected;
-         }(function (_) {    return _.selectable;}(_p1));
+         return isMemberOfBoth(function (_) {    return _.id;}(function (_) {    return _.selectable;}(_p1)));
       },
-      model.positionCategories);
-      var availableCompetencyIds = $List$Extra.dropDuplicates(A2($List.concatMap,function (_) {    return _.coreCompetencyIds;},selectedPositionCategories));
+      model.skills);
+   };
+   var availableCompetencies = function (model) {
+      var availableCompetencyIds = $List$Extra.dropDuplicates(A2($List.concatMap,$Model.coreCompDependencies,currentlySelected(model.positionCategories)));
       return A2($List.filter,function (cc) {    return A2($List.member,cc.selectable.id,availableCompetencyIds);},model.coreCompetencies);
    };
+   var mergeNewSelectables = function (newSels) {
+      var replaceSelIfMatchFound = function (linkedSel) {
+         return _U.update(linkedSel,
+         {selectable: A2($Maybe.withDefault,linkedSel.selectable,A2($List$Extra.find,function (s) {    return _U.eq(s.id,linkedSel.selectable.id);},newSels))});
+      };
+      return $List.map(replaceSelIfMatchFound);
+   };
+   var updateLinkedSels = F2(function (msAction,linkedSels) {
+      return A3($Basics.flip,mergeNewSelectables,linkedSels,A2($MultiSelect.update,msAction,extractSelectables(linkedSels)));
+   });
    var multiSelectView = F3(function (msAddress,msModel,msName) {
       return A2($Html.div,_U.list([]),_U.list([A2($Html.h3,_U.list([]),_U.list([$Html.text(msName)])),A2($MultiSelect.view,msAddress,msModel)]));
    });
    var update = F2(function (action,model) {
       var _p2 = action;
-      if (_p2.ctor === "PosCats") {
-            var newSelectables = A2($MultiSelect.update,_p2._0,toSelectable(model.positionCategories));
-            return _U.update(model,{positionCategories: A2(mergeNewSelectables,newSelectables,model.positionCategories)});
-         } else {
-            return model;
-         }
+      switch (_p2.ctor)
+      {case "PosCats": return _U.update(model,{positionCategories: A2(updateLinkedSels,_p2._0,model.positionCategories)});
+         case "CoreComps": return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p2._0,model.coreCompetencies)});
+         default: return _U.update(model,{skills: A2(updateLinkedSels,_p2._0,model.skills)});}
    });
+   var Skills = function (a) {    return {ctor: "Skills",_0: a};};
    var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
    var PosCats = function (a) {    return {ctor: "PosCats",_0: a};};
    var view = F2(function (address,model) {
-      var forwardTo = $Signal.forwardTo(address);
       return A2($Html.div,
       _U.list([]),
-      _U.list([A3(multiSelectView,forwardTo(PosCats),toSelectable(model.positionCategories),"Position Categories")
-              ,A3(multiSelectView,forwardTo(CoreComps),toSelectable(availableCompetencies(model)),"Core Competencies")]));
+      _U.list([A3(multiSelectView,A2($Signal.forwardTo,address,PosCats),extractSelectables(model.positionCategories),"Position Categories")
+              ,A3(multiSelectView,A2($Signal.forwardTo,address,CoreComps),extractSelectables(availableCompetencies(model)),"Core Competencies")
+              ,A3(multiSelectView,A2($Signal.forwardTo,address,Skills),extractSelectables(availableSkills(model)),"Skills")]));
    });
    var jsonData = Elm.Native.Port.make(_elm).inbound("jsonData",
    "String",
    function (v) {
       return typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",v);
    });
-   var main = $StartApp$Simple.start({model: $JsonParser.parseJson(jsonData),update: update,view: view});
+   var main = $StartApp$Simple.start({model: $JsonParser.testData,update: update,view: view});
    return _elm.SkillsWidget.values = {_op: _op
                                      ,main: main
                                      ,PosCats: PosCats
                                      ,CoreComps: CoreComps
+                                     ,Skills: Skills
                                      ,update: update
                                      ,view: view
                                      ,multiSelectView: multiSelectView
-                                     ,availableCompetencies: availableCompetencies
+                                     ,updateLinkedSels: updateLinkedSels
                                      ,mergeNewSelectables: mergeNewSelectables
-                                     ,toSelectable: toSelectable};
+                                     ,availableCompetencies: availableCompetencies
+                                     ,availableSkills: availableSkills
+                                     ,extractSelectables: extractSelectables
+                                     ,currentlySelected: currentlySelected};
 };
