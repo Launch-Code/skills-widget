@@ -34,6 +34,7 @@ type Action
     = PosCats MultSel.Action
     | CoreComps MultSel.Action
 
+
 update : Action -> Model -> Model
 update action model =
     case action of
@@ -74,11 +75,11 @@ multiSelectView msAddress msModel msName =
 
 
 ------------------------
--- Working with the Data
+-- LOGIC
 ------------------------
 
 {-| extract selectables from their LinkedSelectable wrappers, 
-    update them, 
+    update them according to the MultiSelect Action that just occured, 
     then merge the new selectables back into the wrappers
 -}
 updateLinkedSels : MultSel.Action -> List LinkedSelectable -> List LinkedSelectable
@@ -89,18 +90,26 @@ updateLinkedSels msAction linkedSels =
         |> (flip mergeNewSelectables) linkedSels
 
 
+{-| merge a list of (new) Selectables into a list of (old) LinkedSelectable wrappers, 
+    replacing each oldLinkedSel.selectable with its matching new Selectable (the one
+    with the same ID) unless no matching Selectable could be found in the list.
+-}
 mergeNewSelectables : List Sel.Model -> List LinkedSelectable -> List LinkedSelectable
-mergeNewSelectables newSels oldLinkedSels =
-    oldLinkedSels 
-        |> List.map 
-            (\linkedSel ->
-                { linkedSel |
-                    selectable = 
-                        ListEx.find (\s -> s.id == linkedSel.selectable.id) newSels
-                            |> Maybe.withDefault linkedSel.selectable
-                }
-            )
+mergeNewSelectables newSels =
+    let replaceSelIfMatchFound linkedSel =
+            { linkedSel |
+                selectable = 
+                    ListEx.find (\s -> s.id == linkedSel.selectable.id) newSels
+                        |> Maybe.withDefault linkedSel.selectable
+            }
+    in 
+        List.map replaceSelIfMatchFound
 
+
+{-| return only the core competencies that should be available / visible
+    for the user, given the current state of selected and deselected 
+    position categories
+-}
 availableCompetencies : Model -> List LinkedSelectable
 availableCompetencies model =
     let availableCompetencyIds =
@@ -113,5 +122,9 @@ availableCompetencies model =
             (\cc -> List.member cc.selectable.id availableCompetencyIds) 
             model.coreCompetencies
 
+
+{-| Unwrap the Selectables from a list of LinkedSelectable wrappers
+-}
+extractSelectables : List LinkedSelectable -> List Sel.Model
 extractSelectables =
     List.map .selectable

@@ -10984,14 +10984,13 @@ Elm.SkillsWidget.make = function (_elm) {
       model.positionCategories)));
       return A2($List.filter,function (cc) {    return A2($List.member,cc.selectable.id,availableCompetencyIds);},model.coreCompetencies);
    };
-   var mergeNewSelectables = F2(function (newSels,oldLinkedSels) {
-      return A2($List.map,
-      function (linkedSel) {
+   var mergeNewSelectables = function (newSels) {
+      var replaceSelIfMatchFound = function (linkedSel) {
          return _U.update(linkedSel,
          {selectable: A2($Maybe.withDefault,linkedSel.selectable,A2($List$Extra.find,function (s) {    return _U.eq(s.id,linkedSel.selectable.id);},newSels))});
-      },
-      oldLinkedSels);
-   });
+      };
+      return $List.map(replaceSelIfMatchFound);
+   };
    var updateLinkedSels = F2(function (msAction,linkedSels) {
       return A3($Basics.flip,mergeNewSelectables,linkedSels,A2($MultiSelect.update,msAction,extractSelectables(linkedSels)));
    });
