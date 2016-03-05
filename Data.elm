@@ -134,12 +134,15 @@ selectableDecoder =
 
 -- HELPERS
 
+-- this is located here because the Dependents type is opaque to other
+-- modules, meaning only this module can refer to its three specific options
 coreCompDependencies : LinkedSelectable -> List ID 
 coreCompDependencies linkedSel =
     case linkedSel.dependents of 
         PositionCategory coreCompIDs _ -> coreCompIDs 
         _ -> []
 
+-- see comment above coreCompDependancies
 skillDependencies : LinkedSelectable -> List ID
 skillDependencies linkedSel =
     case linkedSel.dependents of
