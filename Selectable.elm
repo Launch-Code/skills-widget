@@ -13,6 +13,7 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Evnt 
 import String
+import Graphics.Input as Input
 
 
 -- MODEL
@@ -54,19 +55,24 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-    let allCapsIfSelected =
-            if model.isSelected
-                then String.reverse << String.toUpper
-                else identity
-        classSuffix =
-            if model.isSelected
-                then "on"
-                else "off"
+    let checkbox =
+            Html.input 
+                [ Attr.type' "checkbox" 
+                , Attr.checked model.isSelected
+                ] 
+                []
+        onClickAddress = 
+            Signal.forwardTo address (\_ -> Toggle)
+        className =
+            "selectable-"
+                ++ if model.isSelected
+                    then "on"
+                    else "off"
     in
-        Html.button
-            [ Evnt.onClick
-                (Signal.forwardTo address (\_ -> Toggle))
-                NoOp
-            , Attr.class ("selectable-" ++ classSuffix)
+        Html.button 
+            [ Evnt.onClick onClickAddress NoOp
+            , Attr.class className
             ]
-            [ Html.text (model.name |> allCapsIfSelected) ]
+            [ checkbox
+            , Html.text model.name
+            ]
