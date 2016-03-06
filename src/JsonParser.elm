@@ -28,7 +28,7 @@ json =
         ],
         "coreCompetencies": [
             {"name": "Javascript", "id": 1, "skillIds":[1, 2]},
-            {"name": "Html/CSS", "id": 2, "skillIds":[3]},
+            {"name": "Html / CSS", "id": 2, "skillIds":[3]},
             {"name": "Python", "id": 3, "skillIds":[4]}
         ],
         "skills": [

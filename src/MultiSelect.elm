@@ -15,6 +15,7 @@ import List.Extra as ListEx
 import Array
 
 import Selectable as Sel
+import Styles
 
 
 -- MODEL
@@ -53,7 +54,7 @@ update action model =
 -- VIEW
 view : Signal.Address Action -> Model -> Html
 view address model =
-  Html.div [ Attr.class "multiselect" ]
+  Html.div [ Attr.style Styles.multiSelect ]
     <| List.map (itemView address) model
 
 

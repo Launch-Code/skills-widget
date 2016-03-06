@@ -15,6 +15,7 @@ import Html.Events as Evnt
 import String
 import Graphics.Input as Input
 
+import Styles
 
 -- MODEL
 
@@ -59,17 +60,16 @@ view address model =
             Html.input 
                 [ Attr.type' "checkbox" 
                 , Attr.checked model.isSelected
+                , Attr.style Styles.checkbox
                 ] 
                 []
         onClickAddress = 
             Signal.forwardTo address (\_ -> Toggle)
-        className =
-            "selectable-" ++ if model.isSelected then "on" else "off"
     in
         Html.button 
             [ Evnt.onClick onClickAddress NoOp
-            , Attr.class className
+            , Attr.style <| Styles.selectable model.isSelected
             ]
-            [ checkbox
-            , Html.text model.name
+            [ --checkbox,
+             Html.text model.name
             ]

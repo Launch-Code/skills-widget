@@ -1,13 +1,16 @@
 module SkillsWidget where
+
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Dict exposing (Dict)
 import List.Extra as ListEx
 import StartApp.Simple as StartApp
+
 import MultiSelect as MultSel
 import JsonParser
 import Selectable
 import Model exposing (Model, LinkedSelectable)
+import Styles
 
 -- Initialization
 main : Signal Html
@@ -19,7 +22,7 @@ main =
     , view = view
     }
 
-port jsonData : String
+--port jsonData : String
 
 -- UPDATE
 
@@ -53,25 +56,33 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-    Html.div []
+    Html.div 
+        [ Attr.style Styles.skillsWidget ]
         [ multiSelectView
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
             "Position Categories"
+            "Please select any jobs you are interested in persuing"
+        , Html.hr [ Attr.style Styles.horizontalDivider ] [] 
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
             "Core Competencies"
+            "Please select any of the languages and core coompetencies you have"
+        , Html.hr [ Attr.style Styles.horizontalDivider ] [] 
         , multiSelectView
             (Signal.forwardTo address Skills)
             (extractSelectables <| availableSkills model)
             "Skills"
+            "Select any skills you have"
         ]
 
-multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
-multiSelectView msAddress msModel msName =
-    Html.div [ Attr.class "multiselect-container" ]
-        [ Html.h3 [] [ Html.text msName ]
+multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> String -> Html
+multiSelectView msAddress msModel msName msDescription =
+    Html.div 
+        [ Attr.style Styles.multiSelectContainer ]
+        [ Html.h2 [ Attr.style Styles.multiSelectHeading ] [ Html.text msName ]
+        , Html.p [] [Html.text msDescription]
         , MultSel.view msAddress msModel
         ]
 
