@@ -22,7 +22,7 @@ main =
     , view = view
     }
 
---port jsonData : String
+port jsonData : String
 
 -- UPDATE
 
@@ -62,13 +62,13 @@ view address model =
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
             "Position Categories"
-            "Please select any jobs you are interested in persuing"
+            "Select all job roles you are interested in persuing"
         , Html.hr [ Attr.style Styles.horizontalDivider ] [] 
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
             "Core Competencies"
-            "Please select any of the languages and core coompetencies you have"
+            "Something about core compeetencies"
         , Html.hr [ Attr.style Styles.horizontalDivider ] [] 
         , multiSelectView
             (Signal.forwardTo address Skills)

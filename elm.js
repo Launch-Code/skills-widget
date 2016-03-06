@@ -11659,13 +11659,13 @@ Elm.SkillsWidget.make = function (_elm) {
               A2($Signal.forwardTo,address,PosCats),
               extractSelectables(model.positionCategories),
               "Position Categories",
-              "Please select any jobs you are interested in persuing")
+              "Select all job roles you are interested in persuing")
               ,A2($Html.hr,_U.list([$Html$Attributes.style($Styles.horizontalDivider)]),_U.list([]))
               ,A4(multiSelectView,
               A2($Signal.forwardTo,address,CoreComps),
               extractSelectables(availableCompetencies(model)),
               "Core Competencies",
-              "Please select any of the languages and core coompetencies you have")
+              "Something about core compeetencies")
               ,A2($Html.hr,_U.list([$Html$Attributes.style($Styles.horizontalDivider)]),_U.list([]))
               ,A4(multiSelectView,A2($Signal.forwardTo,address,Skills),extractSelectables(availableSkills(model)),"Skills","Select any skills you have")]));
    });
