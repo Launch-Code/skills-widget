@@ -2,6 +2,7 @@ module SkillsWidget where
 
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Html.Events as Events
 import Dict exposing (Dict)
 import List.Extra as ListEx
 import StartApp.Simple as StartApp
@@ -23,6 +24,7 @@ main =
     }
 
 port jsonData : String
+port save : String
 
 -- UPDATE
 
@@ -30,6 +32,7 @@ type Action
     = PosCats MultSel.Action
     | CoreComps MultSel.Action
     | Skills MultSel.Action
+    | Save
 
 
 update : Action -> Model -> Model
@@ -50,7 +53,8 @@ update action model =
                 skills =
                     updateLinkedSels msAction model.skills
             }
-
+        Save ->
+          model
 
 -- VIEW
 
@@ -75,17 +79,19 @@ view address model =
             (extractSelectables <| availableSkills model)
             "Skills"
             "Select any skills you have"
+        , Html.button
+            [ Events.onClick address Save
+            , Attr.id "skill-widget-save"
+            ]
+            [ Html.text "Save" ]
         ]
 
-multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> String -> Html
-multiSelectView msAddress msModel msName msDescription =
-    Html.div 
-        [ Attr.style Styles.multiSelectContainer ]
-        [ Html.h2 [ Attr.style Styles.multiSelectHeading ] [ Html.text msName ]
-        , Html.p [] [Html.text msDescription]
+multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
+multiSelectView msAddress msModel msName =
+    Html.div []
+        [ Html.h3 [] [ Html.text msName ]
         , MultSel.view msAddress msModel
         ]
-
 
 ------------------------
 -- LOGIC

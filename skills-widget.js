@@ -11011,6 +11011,8 @@ Elm.SkillsWidget.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $JsonParser = Elm.JsonParser.make(_elm),
    $List = Elm.List.make(_elm),
    $List$Extra = Elm.List.Extra.make(_elm),
@@ -11057,8 +11059,10 @@ Elm.SkillsWidget.make = function (_elm) {
       switch (_p2.ctor)
       {case "PosCats": return _U.update(model,{positionCategories: A2(updateLinkedSels,_p2._0,model.positionCategories)});
          case "CoreComps": return _U.update(model,{coreCompetencies: A2(updateLinkedSels,_p2._0,model.coreCompetencies)});
-         default: return _U.update(model,{skills: A2(updateLinkedSels,_p2._0,model.skills)});}
+         case "Skills": return _U.update(model,{skills: A2(updateLinkedSels,_p2._0,model.skills)});
+         default: return model;}
    });
+   var Save = {ctor: "Save"};
    var Skills = function (a) {    return {ctor: "Skills",_0: a};};
    var CoreComps = function (a) {    return {ctor: "CoreComps",_0: a};};
    var PosCats = function (a) {    return {ctor: "PosCats",_0: a};};
@@ -11067,7 +11071,8 @@ Elm.SkillsWidget.make = function (_elm) {
       _U.list([]),
       _U.list([A3(multiSelectView,A2($Signal.forwardTo,address,PosCats),extractSelectables(model.positionCategories),"Position Categories")
               ,A3(multiSelectView,A2($Signal.forwardTo,address,CoreComps),extractSelectables(availableCompetencies(model)),"Core Competencies")
-              ,A3(multiSelectView,A2($Signal.forwardTo,address,Skills),extractSelectables(availableSkills(model)),"Skills")]));
+              ,A3(multiSelectView,A2($Signal.forwardTo,address,Skills),extractSelectables(availableSkills(model)),"Skills")
+              ,A2($Html.button,_U.list([A2($Html$Events.onClick,address,Save),$Html$Attributes.id("skill-widget-save")]),_U.list([$Html.text("Save")]))]));
    });
    var jsonData = Elm.Native.Port.make(_elm).inbound("jsonData",
    "String",
@@ -11080,6 +11085,7 @@ Elm.SkillsWidget.make = function (_elm) {
                                      ,PosCats: PosCats
                                      ,CoreComps: CoreComps
                                      ,Skills: Skills
+                                     ,Save: Save
                                      ,update: update
                                      ,view: view
                                      ,multiSelectView: multiSelectView
