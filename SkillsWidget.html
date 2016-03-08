@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Embedding Elm in HTML!</title>
+    <script type="text/javascript" src="elm.js"></script>
+  </head>
+
+  <body>
+    <h1>Skills Widget</h1>
+    <div id="skills-widget" style="width:50%; height:400px;"></div>
+  </body>
+
+  <script type="text/javascript">
+    var swDiv = document.getElementById('skills-widget');
+    Elm.embed(Elm.SkillsWidget, swDiv);
+
+  </script>
+
+</html>

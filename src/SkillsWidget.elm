@@ -18,7 +18,8 @@ import Styles
 app : StartApp.App Model
 app = 
     StartApp.start 
-        { init = JsonParser.parseJson jsonData |> noEffects
+        --{ init = JsonParser.parseJson jsonData |> noEffects
+        { init = JsonParser.testData |> noEffects
         , update = update
         , view = view
         , inputs = []
@@ -30,12 +31,11 @@ main =
   app.html
 
 
-port jsonData : String
+--port jsonData : String
 
 port outputPort : Signal String
 port outputPort = 
     Signal.map (JsonParser.encodeSelectedItems) app.model 
-
 
 -- UPDATE
 
@@ -66,6 +66,7 @@ update action model =
                 }
 
 
+-- when you dont care about the damn Effects
 noEffects : a -> (a, Effects Action)
 noEffects =
     flip (,) Effects.none
