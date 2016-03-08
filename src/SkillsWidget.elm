@@ -5,7 +5,7 @@ import Html.Attributes as Attr
 import Html.Events as Events
 import Dict exposing (Dict)
 import List.Extra as ListEx
-import StartApp.Simple as StartApp
+import StartApp
 
 import MultiSelect as MultSel
 import JsonParser
@@ -13,33 +13,28 @@ import Json.Decode as Decode
 import Selectable
 import Model exposing (Model, LinkedSelectable)
 import Styles
--- import Effects exposing (Effects)
--- import Http
--- import Task
+import Effects exposing (Effects)
 
 import Debug
 
 -- Initialization
 main : Signal Html
--- main = app.html
-
 main =
+  app.html
+
+app : StartApp.App Model
+app = 
   StartApp.start
-    { model = model
+    { init = (JsonParser.parseJson JsonParser.testData) |> noEffects
     , update = update
     , view = view
+    , inputs = []
     }
-
--- init : String -> (Model, Effects Action)
--- init json = (JsonParser.parseJson json, Effects.none)
-model : Model
-model = JsonParser.parseJson JsonParser.testData --jsonData
 
 port jsonData : String
 port output : Signal String
-port output = Signal.map JsonParser.encode signalOfModel
-signalOfModel : Signal Model
-signalOfModel =
+port output = Signal.map (JsonParser.encode ) app.model
+
 -- UPDATE
 
 type Action
@@ -47,8 +42,9 @@ type Action
     | CoreComps MultSel.Action
     | Skills MultSel.Action
 
-update : Action -> Model -> Model
+update : Action -> Model -> (Model, Effects Action)
 update action model =
+  noEffects <|
     case action of
         PosCats msAction ->
             { model |
@@ -66,6 +62,12 @@ update action model =
                     updateLinkedSels msAction model.skills
             }
 
+-- when we don't care about the effects. This method applies a empty effect to all out our actions
+-- making the the return value be (Model, Effects Action) instead of just Model
+-- We need to use effects here because we are creating a side effect when we use our outgoing port
+noEffects : a -> (a, Effects Action)
+noEffects =
+  flip (,) Effects.none
 
 -- VIEW
 
