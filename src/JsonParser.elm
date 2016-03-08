@@ -11,8 +11,6 @@ import Model exposing (Model, LinkedSelectable, Dependents (..))
 encodeSelectedItems : Model -> String
 encodeSelectedItems model =
     "TODO" 
-        |> Debug.log "someone is trying to encode stuff!"
-
 
 
 ---------------------------------------------

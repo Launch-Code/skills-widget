@@ -13,8 +13,11 @@
 
   <script type="text/javascript">
     var swDiv = document.getElementById('skills-widget');
-    Elm.embed(Elm.SkillsWidget, swDiv);
-
+    var app = Elm.embed(Elm.SkillsWidget, swDiv);
+    app.ports.outputPort.subscribe(proccessStuff);
+    function proccessStuff(json) {
+    	console.log("Here in JS land, we just received a message from Elm land! It says: " + json);
+    }
   </script>
 
 </html>

@@ -10971,7 +10971,7 @@ Elm.JsonParser.make = function (_elm) {
    var json = "\n    {\n        \"positionCategories\": [\n            {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2], \"skillIds\":[1, 3]},\n            {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3], \"skillIds\":[2, 4]}\n        ],\n        \"coreCompetencies\": [\n            {\"name\": \"Javascript\", \"id\": 1, \"skillIds\":[1, 2]},\n            {\"name\": \"Html / CSS\", \"id\": 2, \"skillIds\":[3]},\n            {\"name\": \"Python\", \"id\": 3, \"skillIds\":[4]}\n        ],\n        \"skills\": [\n            {\"name\": \"jQuery\", \"id\": 1},\n            {\"name\": \"Node.js\", \"id\": 2},\n            {\"name\": \"Bootstrap\", \"id\": 3},\n            {\"name\": \"Django\", \"id\": 4}\n        ]\n    }\n    ";
    var testData = parseJson(json);
    var exampleJsonString = "\n  {\n    \"positionCategories\": [\n      {\"name\": \"Front End\", \"id\": 1, \"coreCompetencyIds\":[1,2]},\n      {\"name\": \"Back End\", \"id\": 2, \"coreCompetencyIds\":[1,3]}\n   ],\n   \"coreCompetencies\": [\n     {\"name\": \"Javascript\", \"id\": 1},\n     {\"name\": \"Html/CSS\", \"id\": 2},\n     {\"name\": \"Python\", \"id\": 3}\n   ]\n }\n";
-   var encodeSelectedItems = function (model) {    return A2($Debug.log,"encoding some shits!","TODO");};
+   var encodeSelectedItems = function (model) {    return "TODO";};
    return _elm.JsonParser.values = {_op: _op,parseJson: parseJson,testData: testData,encodeSelectedItems: encodeSelectedItems};
 };
 Elm.Set = Elm.Set || {};
