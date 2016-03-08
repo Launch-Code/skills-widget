@@ -8,19 +8,15 @@ module
         )
     where
 
-
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Evnt
 import String
 import Graphics.Input as Input
-
 import Styles
 
 -- MODEL
 
-{-| an option that the user can toggle on and off
--}
 type alias Model =
     { id : ID
     , name : String
@@ -57,16 +53,16 @@ update action model =
 view : Signal.Address Action -> Model -> Html
 view address model =
     let checkbox =
-            Html.input 
-                [ Attr.type' "checkbox" 
+            Html.input
+                [ Attr.type' "checkbox"
                 , Attr.checked model.isSelected
                 , Attr.style Styles.checkbox
-                ] 
+                ]
                 []
-        onClickAddress = 
+        onClickAddress =
             Signal.forwardTo address (\_ -> Toggle)
     in
-        Html.button 
+        Html.div
             [ Evnt.onClick onClickAddress NoOp
             , Attr.style <| Styles.selectable model.isSelected
             ]

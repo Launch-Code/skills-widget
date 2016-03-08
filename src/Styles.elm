@@ -50,7 +50,7 @@ selectable isSelected =
 
 selectableOn : Styles
 selectableOn =
-    [ ("background-color", colors.buttonSelected) 
+    [ ("background-color", colors.buttonSelected)
     , ("border-color", colors.buttonSelected)
     , ("box-shadow", "0px 0px 10px gray")
     ]
@@ -63,15 +63,10 @@ checkbox =
 
 horizontalDivider : Styles
 horizontalDivider =
-    [ ("width", "50%") 
+    [ ("width", "50%")
     , ("margin-left", "0")
     , ("opacity", "0.25")
     ]
-
-saveButton : Styles
-saveButton =
-    [("background-color", affirmativeGreen)]
-
 
 type alias ColorSet =
     { buttonBG : String

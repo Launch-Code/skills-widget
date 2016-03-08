@@ -1,4 +1,10 @@
-module Model (Model, LinkedSelectable, Dependents (Skill, PositionCategory, CoreCompetency), coreCompDependencies, skillDependencies) where
+module Model ( Model
+             , LinkedSelectable
+             , Dependents (Skill, PositionCategory, CoreCompetency)
+             , Output
+             , coreCompDependencies
+             , skillDependencies
+             ) where
 import Selectable
 
 type alias Model =
@@ -26,6 +32,14 @@ type Dependents
   | CoreCompetency
     (List ID) -- dependent skills
   | Skill
+
+{-| A Record that we can supply to out output port.
+This will be translated into a POJO for any js subscribed to the port -}
+type alias Output =
+  { positionCategoryIds: List ID
+  , coreCompetencyIds: List ID
+  , skillIds: List ID
+  }
 
 type alias ID = Int
 

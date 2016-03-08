@@ -1,4 +1,4 @@
-module JsonParser (parseJson, testData, decodeResponse, encode) where
+module JsonParser (parseJson, testData) where
 import Selectable
 import Json.Decode as Decode exposing (Decoder, (:=))
 import Json.Encode as Encode
@@ -87,34 +87,26 @@ selectableDecoder =
         ("id" := Decode.int)
         ("name" := Decode.string)
 
--- Model to JSON
-encode : Model -> String
-encode model =
-  Encode.encode 0 (encodeModel model)
+-- -- Model to JSON
+-- encode : Model -> String
+-- encode model =
+--   Encode.encode 0 (encodeModel model)
 
-encodeModel : Model -> Encode.Value
-encodeModel model =
-  Encode.object
-    -- TODO should we filter out only things that are on here or in the Save action???????
-    [ ("positionCategories", linkedSelectablesEncoder <| model.positionCategories)
-    , ("coreCompetencies", linkedSelectablesEncoder <| model.coreCompetencies)
-    , ("skills", linkedSelectablesEncoder <| model.skills)
-    ]
+-- encodeModel : Model -> Encode.Value
+-- encodeModel model =
+--   Encode.object
+--     [ ("positionCategories", linkedSelectablesEncoder <| model.positionCategories)
+--     , ("coreCompetencies", linkedSelectablesEncoder <| model.coreCompetencies)
+--     , ("skills", linkedSelectablesEncoder <| model.skills)
+--     ]
 
-linkedSelectablesEncoder : List LinkedSelectable -> Encode.Value
-linkedSelectablesEncoder linkedSelectables =
-  Encode.list (List.map linkedSelectableEncoder linkedSelectables)
+-- linkedSelectablesEncoder : List LinkedSelectable -> Encode.Value
+-- linkedSelectablesEncoder linkedSelectables =
+--   Encode.list (List.map linkedSelectableEncoder linkedSelectables)
 
-linkedSelectableEncoder : LinkedSelectable -> Encode.Value
-linkedSelectableEncoder linkedSelectable =
-  Encode.object
-    [ ("id", Encode.int linkedSelectable.selectable.id)
-    , ("name", Encode.string linkedSelectable.selectable.name)
-    ]
-
-
--- Decode server response
-decodeResponse : Decoder Int
-decodeResponse =
-  let debug = Debug.log "some shit" in
-  "status" := Decode.int
+-- linkedSelectableEncoder : LinkedSelectable -> Encode.Value
+-- linkedSelectableEncoder linkedSelectable =
+--   Encode.object
+--     [ ("id", Encode.int linkedSelectable.selectable.id)
+--     , ("name", Encode.string linkedSelectable.selectable.name)
+--     ]

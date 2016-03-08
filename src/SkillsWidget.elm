@@ -11,7 +11,7 @@ import MultiSelect as MultSel
 import JsonParser
 import Json.Decode as Decode
 import Selectable
-import Model exposing (Model, LinkedSelectable)
+import Model exposing (Model, LinkedSelectable, Output)
 import Styles
 import Effects exposing (Effects)
 
@@ -23,7 +23,7 @@ main =
   app.html
 
 app : StartApp.App Model
-app = 
+app =
   StartApp.start
     { init = (JsonParser.parseJson JsonParser.testData) |> noEffects
     , update = update
@@ -32,8 +32,22 @@ app =
     }
 
 port jsonData : String
-port output : Signal String
-port output = Signal.map (JsonParser.encode ) app.model
+port output : Signal Output
+port output = Signal.map (outputModel) app.model
+
+outputModel : Model -> Output
+outputModel model =
+  let filterIsOn =  List.filter (.isSelected << .selectable)
+      collectIds =  List.map (.id << .selectable)
+      selectedPosCatIds = collectIds <| filterIsOn <| model.positionCategories
+      selectedCoreCompIds = collectIds <| filterIsOn <| availableCompetencies <| model
+      selectedSkillIds = collectIds <| filterIsOn <| availableSkills <| model
+  in
+    { positionCategoryIds = selectedPosCatIds
+    , coreCompetencyIds = selectedCoreCompIds
+    , skillIds = selectedSkillIds
+    }
+
 
 -- UPDATE
 
@@ -62,9 +76,10 @@ update action model =
                     updateLinkedSels msAction model.skills
             }
 
--- when we don't care about the effects. This method applies a empty effect to all out our actions
+-- when we don't care about the effects.
+-- This method applies a empty effect to all out our actions
 -- making the the return value be (Model, Effects Action) instead of just Model
--- We need to use effects here because we are creating a side effect when we use our outgoing port
+-- We need to use effects here because we are creating a side effect when we update our outgoing port
 noEffects : a -> (a, Effects Action)
 noEffects =
   flip (,) Effects.none
