@@ -1,21 +1,9 @@
-module JsonParser (parseJson, testData) where
+module JsonParser (parseJson, testData, decodeResponse, encode) where
 import Selectable
 import Json.Decode as Decode exposing (Decoder, (:=))
+import Json.Encode as Encode
 import Model exposing (Model, LinkedSelectable, Dependents (..))
-
-exampleJsonString = """
-  {
-    "positionCategories": [
-      {"name": "Front End", "id": 1, "coreCompetencyIds":[1,2]},
-      {"name": "Back End", "id": 2, "coreCompetencyIds":[1,3]}
-   ],
-   "coreCompetencies": [
-     {"name": "Javascript", "id": 1},
-     {"name": "Html/CSS", "id": 2},
-     {"name": "Python", "id": 3}
-   ]
- }
-"""
+import Debug
 
 -- JSON parsing
 
@@ -40,9 +28,10 @@ json =
     }
     """
 
-testData : Model
-testData = parseJson json
+testData : String
+testData = json
 
+-- JSON to Model
 parseJson : String -> Model
 parseJson json =
     Decode.decodeString modelDecoder json
@@ -97,3 +86,35 @@ selectableDecoder =
         (\id n -> Selectable.init id n False)
         ("id" := Decode.int)
         ("name" := Decode.string)
+
+-- Model to JSON
+encode : Model -> String
+encode model =
+  Encode.encode 0 (encodeModel model)
+
+encodeModel : Model -> Encode.Value
+encodeModel model =
+  Encode.object
+    -- TODO should we filter out only things that are on here or in the Save action???????
+    [ ("positionCategories", linkedSelectablesEncoder <| model.positionCategories)
+    , ("coreCompetencies", linkedSelectablesEncoder <| model.coreCompetencies)
+    , ("skills", linkedSelectablesEncoder <| model.skills)
+    ]
+
+linkedSelectablesEncoder : List LinkedSelectable -> Encode.Value
+linkedSelectablesEncoder linkedSelectables =
+  Encode.list (List.map linkedSelectableEncoder linkedSelectables)
+
+linkedSelectableEncoder : LinkedSelectable -> Encode.Value
+linkedSelectableEncoder linkedSelectable =
+  Encode.object
+    [ ("id", Encode.int linkedSelectable.selectable.id)
+    , ("name", Encode.string linkedSelectable.selectable.name)
+    ]
+
+
+-- Decode server response
+decodeResponse : Decoder Int
+decodeResponse =
+  let debug = Debug.log "some shit" in
+  "status" := Decode.int

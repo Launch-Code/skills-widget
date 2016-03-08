@@ -9,31 +9,43 @@ import StartApp.Simple as StartApp
 
 import MultiSelect as MultSel
 import JsonParser
+import Json.Decode as Decode
 import Selectable
 import Model exposing (Model, LinkedSelectable)
 import Styles
+-- import Effects exposing (Effects)
+-- import Http
+-- import Task
+
+import Debug
 
 -- Initialization
 main : Signal Html
+-- main = app.html
+
 main =
   StartApp.start
-    -- { model = JsonParser.parseJson jsonData
-    { model = JsonParser.testData
+    { model = model
     , update = update
     , view = view
     }
 
-port jsonData : String
-port save : String
+-- init : String -> (Model, Effects Action)
+-- init json = (JsonParser.parseJson json, Effects.none)
+model : Model
+model = JsonParser.parseJson JsonParser.testData --jsonData
 
+port jsonData : String
+port output : Signal String
+port output = Signal.map JsonParser.encode signalOfModel
+signalOfModel : Signal Model
+signalOfModel =
 -- UPDATE
 
 type Action
     = PosCats MultSel.Action
     | CoreComps MultSel.Action
     | Skills MultSel.Action
-    | Save
-
 
 update : Action -> Model -> Model
 update action model =
@@ -53,37 +65,28 @@ update action model =
                 skills =
                     updateLinkedSels msAction model.skills
             }
-        Save ->
-          model
+
 
 -- VIEW
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-    Html.div 
+    Html.div
         [ Attr.style Styles.skillsWidget ]
         [ multiSelectView
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
             "Position Categories"
-            "Select all job roles you are interested in persuing"
-        , Html.hr [ Attr.style Styles.horizontalDivider ] [] 
+        , Html.hr [ Attr.style Styles.horizontalDivider ] []
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
             "Core Competencies"
-            "Something about core compeetencies"
-        , Html.hr [ Attr.style Styles.horizontalDivider ] [] 
+        , Html.hr [ Attr.style Styles.horizontalDivider ] []
         , multiSelectView
             (Signal.forwardTo address Skills)
             (extractSelectables <| availableSkills model)
             "Skills"
-            "Select any skills you have"
-        , Html.button
-            [ Events.onClick address Save
-            , Attr.id "skill-widget-save"
-            ]
-            [ Html.text "Save" ]
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html

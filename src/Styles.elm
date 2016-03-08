@@ -68,6 +68,9 @@ horizontalDivider =
     , ("opacity", "0.25")
     ]
 
+saveButton : Styles
+saveButton =
+    [("background-color", affirmativeGreen)]
 
 
 type alias ColorSet =

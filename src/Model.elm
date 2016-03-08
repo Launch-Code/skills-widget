@@ -1,7 +1,6 @@
 module Model (Model, LinkedSelectable, Dependents (Skill, PositionCategory, CoreCompetency), coreCompDependencies, skillDependencies) where
 import Selectable
 
-
 type alias Model =
   { positionCategories : List LinkedSelectable
   , coreCompetencies : List LinkedSelectable
