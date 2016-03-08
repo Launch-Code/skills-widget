@@ -1,7 +1,22 @@
-module JsonParser (parseJson, testData) where
+module JsonParser (parseJson, testData, encodeSelectedItems) where
 import Selectable
 import Json.Decode as Decode exposing (Decoder, (:=))
 import Model exposing (Model, LinkedSelectable, Dependents (..))
+
+
+------------------------------------------------
+-- JSON encoding (the output from the black box)
+------------------------------------------------
+
+encodeSelectedItems : Model -> String
+encodeSelectedItems model =
+    "TODO"
+
+
+
+---------------------------------------------
+-- JSON decoding (the input to the black box)
+---------------------------------------------
 
 exampleJsonString = """
   {
@@ -16,8 +31,6 @@ exampleJsonString = """
    ]
  }
 """
-
--- JSON parsing
 
 json =
     """

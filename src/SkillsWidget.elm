@@ -4,7 +4,8 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Dict exposing (Dict)
 import List.Extra as ListEx
-import StartApp.Simple as StartApp
+import StartApp
+import Effects exposing (Effects)
 
 import MultiSelect as MultSel
 import JsonParser
@@ -13,16 +14,28 @@ import Model exposing (Model, LinkedSelectable)
 import Styles
 
 -- Initialization
+
+app : StartApp.App Model
+app = 
+    StartApp.start 
+        { init = JsonParser.parseJson jsonData |> noEffects
+        , update = update
+        , view = view
+        , inputs = []
+        }
+
+
 main : Signal Html
 main =
-  StartApp.start
-    -- { model = JsonParser.parseJson jsonData
-    { model = JsonParser.testData
-    , update = update
-    , view = view
-    }
+  app.html
+
 
 port jsonData : String
+
+port outputPort : Signal String
+port outputPort = 
+    Signal.map (JsonParser.encodeSelectedItems) app.model 
+
 
 -- UPDATE
 
@@ -32,24 +45,30 @@ type Action
     | Skills MultSel.Action
 
 
-update : Action -> Model -> Model
+update : Action -> Model -> (Model, Effects Action)
 update action model =
-    case action of
-        PosCats msAction ->
-            { model |
-                positionCategories =
-                    updateLinkedSels msAction model.positionCategories
-            }
-        CoreComps msAction ->
-            { model |
-                coreCompetencies =
-                    updateLinkedSels msAction model.coreCompetencies
-            }
-        Skills msAction ->
-            { model |
-                skills =
-                    updateLinkedSels msAction model.skills
-            }
+    noEffects <|
+        case action of
+            PosCats msAction ->
+                { model |
+                    positionCategories =
+                        updateLinkedSels msAction model.positionCategories
+                }
+            CoreComps msAction ->
+                { model |
+                    coreCompetencies =
+                        updateLinkedSels msAction model.coreCompetencies
+                }
+            Skills msAction ->
+                { model |
+                    skills =
+                        updateLinkedSels msAction model.skills
+                }
+
+
+noEffects : a -> (a, Effects Action)
+noEffects =
+    flip (,) Effects.none
 
 
 -- VIEW
