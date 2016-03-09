@@ -51,18 +51,23 @@ outputModel model =
 
 setInitialSelected : Model -> Model
 setInitialSelected model =
-  let turnOnLinkedSelectable linkedSel =
+  let turnOn selectedIds linkedSelectable =
+        if List.member linkedSelectable.selectable.id selectedIds
+        then turnOnNestedSel linkedSelectable
+        else linkedSelectable
+
+      turnOnNestedSel linkedSel =
         let sel = linkedSel.selectable
             updatedSel = { sel | isSelected = True }
         in
           { linkedSel | selectable = updatedSel }
   in
-  { model |
-      positionCategories = List.map (\s -> if List.member s.selectable.id selected.positionCategoryIds
-                                          then turnOnLinkedSelectable s
-                                          else s
-                                   ) model.positionCategories
-  }
+
+    { model |
+        positionCategories = List.map (turnOn selected.positionCategoryIds) model.positionCategories,
+        coreCompetencies = List.map (turnOn selected.coreCompetencyIds) model.coreCompetencies,
+        skills = List.map (turnOn selected.skillIds) model.skills
+    }
 
 
 -- UPDATE
