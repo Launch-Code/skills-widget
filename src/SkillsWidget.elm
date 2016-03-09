@@ -25,13 +25,14 @@ main =
 app : StartApp.App Model
 app =
   StartApp.start
-    { init = (JsonParser.parseJson JsonParser.testData) |> noEffects
+    { init = (JsonParser.parseJson JsonParser.testData) |> setInitialSelected |> noEffects
     , update = update
     , view = view
     , inputs = []
     }
 
 port jsonData : String
+port selected : Output
 port output : Signal Output
 port output = Signal.map (outputModel) app.model
 
@@ -47,6 +48,21 @@ outputModel model =
     , coreCompetencyIds = selectedCoreCompIds
     , skillIds = selectedSkillIds
     }
+
+setInitialSelected : Model -> Model
+setInitialSelected model =
+  let turnOnLinkedSelectable linkedSel =
+        let sel = linkedSel.selectable
+            updatedSel = { sel | isSelected = True }
+        in
+          { linkedSel | selectable = updatedSel }
+  in
+  { model |
+      positionCategories = List.map (\s -> if List.member s.selectable.id selected.positionCategoryIds
+                                          then turnOnLinkedSelectable s
+                                          else s
+                                   ) model.positionCategories
+  }
 
 
 -- UPDATE
