@@ -25,7 +25,7 @@ main =
 app : StartApp.App Model
 app =
   StartApp.start
-    { init = (JsonParser.parseJson JsonParser.testData) |> setInitialSelected |> noEffects
+    { init = (JsonParser.parseJson jsonData) |> setInitialSelected |> noEffects
     , update = update
     , view = view
     , inputs = []
@@ -190,20 +190,21 @@ availableCompetencies model =
 availableSkills : Model -> List LinkedSelectable
 availableSkills model =
     let availableIDs parents =
-            parents
-                |> currentlySelected
-                |> List.concatMap Model.skillDependencies
-                |> ListEx.dropDuplicates
+          parents |> currentlySelected
+            |> List.concatMap Model.skillDependencies
+            |> ListEx.dropDuplicates
         idsFromPosCats =
-            availableIDs model.positionCategories
+          availableIDs model.positionCategories
         idsFromCoreComps =
-            availableIDs model.coreCompetencies
+          availableIDs model.coreCompetencies
         isMemberOfBoth id =
-            List.member id idsFromPosCats && List.member id idsFromCoreComps
+          List.member id idsFromPosCats && List.member id idsFromCoreComps
+        isMemberOfEither id =
+          List.member id idsFromPosCats || List.member id idsFromCoreComps
     in
-        List.filter
-            (isMemberOfBoth << .id << .selectable)
-            model.skills
+      List.filter
+        (isMemberOfEither << .id << .selectable)
+        model.skills
 
 extractSelectables : List LinkedSelectable -> List Selectable.Model
 extractSelectables = List.map .selectable
