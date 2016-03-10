@@ -25,7 +25,7 @@ main =
 app : StartApp.App Model
 app =
   StartApp.start
-    { init = (JsonParser.parseJson JsonParser.testData) |> setInitialSelected |> noEffects
+    { init = (JsonParser.parseJson jsonData) |> setInitialSelected |> noEffects
     , update = update
     , view = view
     , inputs = []
@@ -124,7 +124,9 @@ view address model =
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
 multiSelectView msAddress msModel msName =
-    Html.div []
+    if List.isEmpty msModel
+    then Html.div [] []
+    else Html.div []
         [ Html.h3 [] [ Html.text msName ]
         , MultSel.view msAddress msModel
         ]

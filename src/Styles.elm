@@ -65,7 +65,7 @@ horizontalDivider : Styles
 horizontalDivider =
     [ ("width", "50%")
     , ("margin-left", "0")
-    , ("opacity", "0.25")
+    , ("opacity", "0.5")
     ]
 
 type alias ColorSet =
