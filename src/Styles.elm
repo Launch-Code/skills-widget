@@ -10,7 +10,7 @@ type alias Styles = List (String, String)
 
 skillsWidget: Styles
 skillsWidget =
-    [ ("padding", "20px") 
+    [ ("padding", "20px")
     ]
 
 
@@ -26,7 +26,7 @@ multiSelectContainer =
 
 multiSelectHeading : Styles
 multiSelectHeading =
-    [ ("margin-top", "12px") 
+    [ ("margin-top", "12px")
     ]
 
 multiSelect : Styles
@@ -37,8 +37,10 @@ multiSelect =
 
 selectable : Bool -> Styles
 selectable isSelected =
-    [ ("font-size", "16px") 
-    , ("padding", "6px")
+    [ ("display", "inline-block")
+    , ("font-size", "14px")
+    , ("padding", "12px")
+    , ("margin-bottom", "10px")
     , ("margin-right", "8px")
     , ("border-radius", "2px")
     , ("border-width", "0")
@@ -52,7 +54,7 @@ selectableOn : Styles
 selectableOn =
     [ ("background-color", colors.buttonSelected)
     , ("border-color", colors.buttonSelected)
-    , ("box-shadow", "0px 0px 10px gray")
+    , ("border-bottom", "2px solid #5c93ce")
     ]
 
 
@@ -77,11 +79,8 @@ type alias ColorSet =
 
 colors : ColorSet
 colors =
-    { buttonBG = "#888"
-    , buttonSelected = "cornflowerblue" -- affirmativeGreen --
-    , buttonText = "white"
+    { buttonBG = "white"
+    , buttonSelected = "#5c93ce"
+    , buttonText = "#344a5f"
     , titleColor = "#aaa"
     }
-
-affirmativeGreen = "#0c0"
-
