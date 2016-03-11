@@ -26,7 +26,8 @@ multiSelectContainer =
 
 multiSelectHeading : Styles
 multiSelectHeading =
-    [ ("margin-top", "12px")
+    [ ("line-height", "1.75")
+    , ("margin-bottom", "20px")
     ]
 
 multiSelect : Styles
@@ -39,22 +40,21 @@ selectable : Bool -> Styles
 selectable isSelected =
     [ ("display", "inline-block")
     , ("font-size", "14px")
-    , ("padding", "12px")
+    , ("padding", "10px")
     , ("margin-bottom", "10px")
-    , ("margin-right", "8px")
-    , ("border-radius", "2px")
+    , ("margin-right", "10px")
+    , ("border-radius", "4px")
     , ("border-width", "0")
     , ("color", colors.buttonText)
-    , ("background-color", colors.buttonBG)
     ]
     ++ if isSelected then selectableOn else []
 
 
 selectableOn : Styles
 selectableOn =
-    [ ("background-color", colors.buttonSelected)
-    , ("border-color", colors.buttonSelected)
-    , ("border-bottom", "2px solid #5c93ce")
+    [ ("background-color", colors.buttonBgSelected)
+    , ("border-color", colors.buttonBgSelected)
+    , ("color", colors.buttonTextSelected)
     ]
 
 
@@ -65,22 +65,24 @@ checkbox =
 
 horizontalDivider : Styles
 horizontalDivider =
-    [ ("width", "50%")
+    [ ("width", "100%")
     , ("margin-left", "0")
     , ("opacity", "0.5")
     ]
 
 type alias ColorSet =
-    { buttonBG : String
-    , buttonSelected : String
+    { buttonBgUnselected : String
+    , buttonBgSelected : String
     , buttonText : String
+    , buttonTextSelected : String
     , titleColor : String
     }
 
 colors : ColorSet
 colors =
-    { buttonBG = "white"
-    , buttonSelected = "#5c93ce"
+    { buttonBgUnselected = "white"
+    , buttonBgSelected = "#5c93ce"
     , buttonText = "#344a5f"
+    , buttonTextSelected = "white"
     , titleColor = "#aaa"
     }

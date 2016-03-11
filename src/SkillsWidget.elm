@@ -114,17 +114,17 @@ view address model =
         [ multiSelectView
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
-            "Position Categories"
+            "Which types of apprenticeships are you interested in?"
         , Html.hr [ Attr.style Styles.horizontalDivider ] []
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
-            "Core Competencies"
+            "Select the technologies that you have completed a project in or feel most confident using."
         , Html.hr [ Attr.style Styles.horizontalDivider ] []
         , multiSelectView
             (Signal.forwardTo address Skills)
             (extractSelectables <| availableSkills model)
-            "Skills"
+            "What other skills do you know?"
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
@@ -132,7 +132,7 @@ multiSelectView msAddress msModel msName =
     if List.isEmpty msModel
     then Html.div [] []
     else Html.div []
-        [ Html.h3 [] [ Html.text msName ]
+        [ Html.h3 [ Attr.style Styles.multiSelectHeading] [ Html.text msName ]
         , MultSel.view msAddress msModel
         ]
 
