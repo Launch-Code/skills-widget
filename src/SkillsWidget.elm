@@ -115,12 +115,10 @@ view address model =
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
             "Which types of apprenticeships are you interested in?"
-        , Html.hr [ Attr.style Styles.horizontalDivider ] []
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
             "Select the technologies that you have completed a project in or feel most confident using."
-        , Html.hr [ Attr.style Styles.horizontalDivider ] []
         , multiSelectView
             (Signal.forwardTo address Skills)
             (extractSelectables <| availableSkills model)

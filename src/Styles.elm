@@ -33,6 +33,7 @@ multiSelectHeading =
 multiSelect : Styles
 multiSelect =
     [ ("min-height", "50px")
+    , ("margin-bottom", "40px")
     ]
 
 
@@ -44,8 +45,9 @@ selectable isSelected =
     , ("margin-bottom", "10px")
     , ("margin-right", "10px")
     , ("border-radius", "4px")
-    , ("border-width", "0")
+    , ("border", "solid 1px #d8d9d9")
     , ("color", colors.buttonText)
+    , ("background-color", colors.buttonBgUnselected)
     ]
     ++ if isSelected then selectableOn else []
 
@@ -53,7 +55,7 @@ selectable isSelected =
 selectableOn : Styles
 selectableOn =
     [ ("background-color", colors.buttonBgSelected)
-    , ("border-color", colors.buttonBgSelected)
+    , ("border-width", "0")
     , ("color", colors.buttonTextSelected)
     ]
 
@@ -62,13 +64,6 @@ checkbox : Styles
 checkbox =
     [ ("margin-right", "4px") ]
 
-
-horizontalDivider : Styles
-horizontalDivider =
-    [ ("width", "100%")
-    , ("margin-left", "0")
-    , ("opacity", "0.5")
-    ]
 
 type alias ColorSet =
     { buttonBgUnselected : String
