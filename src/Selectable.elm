@@ -65,6 +65,7 @@ view address model =
         Html.div
             [ Evnt.onClick onClickAddress NoOp
             , Attr.style <| Styles.selectable model.isSelected
+            , Attr.class "selectable-element"
             ]
             [ --checkbox,
              Html.text model.name

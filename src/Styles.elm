@@ -45,7 +45,7 @@ selectable isSelected =
     , ("margin-bottom", "10px")
     , ("margin-right", "10px")
     , ("border-radius", "4px")
-    , ("border", "solid 1px #d8d9d9")
+    , ("cursor", "pointer")
     , ("color", colors.buttonText)
     , ("background-color", colors.buttonBgUnselected)
     ]
@@ -56,6 +56,7 @@ selectableOn : Styles
 selectableOn =
     [ ("background-color", colors.buttonBgSelected)
     , ("border-width", "0")
+    , ("border", "solid 1px #d8d9d9")
     , ("color", colors.buttonTextSelected)
     ]
 

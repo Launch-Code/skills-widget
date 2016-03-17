@@ -121,7 +121,7 @@ view address model =
             "Select the technologies that you have completed a project in or feel most confident using."
         , multiSelectView
             (Signal.forwardTo address Skills)
-            (extractSelectables <| availableSkills model)
+            ((List.sortBy .name) <| extractSelectables <| availableSkills model)
             "What other skills do you know?"
         ]
 
@@ -179,12 +179,12 @@ availableCompetencies model =
                 |> ListEx.dropDuplicates
     in
         List.filter
-            (\cc -> List.member cc.selectable.id availableCompetencyIds) 
+            (\cc -> List.member cc.selectable.id availableCompetencyIds)
             model.coreCompetencies
 
 
 {-| return only the skills that should be available / visible
-    for the user, given the current state of selected and deselected 
+    for the user, given the current state of selected and deselected
     position categories and core competencies
 -}
 availableSkills : Model -> List LinkedSelectable
@@ -197,13 +197,22 @@ availableSkills model =
           availableIDs model.positionCategories
         idsFromCoreComps =
           availableIDs model.coreCompetencies
+        idsFromAllCoreComps =
+          model.coreCompetencies
+            |> List.concatMap Model.skillDependencies
+            |> ListEx.dropDuplicates
+        isMemberOfSelectedPosCats id =
+          List.member id idsFromPosCats
         isMemberOfBoth id =
-          List.member id idsFromPosCats && List.member id idsFromCoreComps
-        isMemberOfEither id =
-          List.member id idsFromPosCats || List.member id idsFromCoreComps
+           isMemberOfSelectedPosCats id && List.member id idsFromCoreComps
+        isMemberOfAnyCoreComp id =
+          List.member id idsFromAllCoreComps
     in
       List.filter
-        (isMemberOfEither << .id << .selectable)
+        (\s ->
+          let skillId = (.id << .selectable) s in
+            (isMemberOfBoth skillId) || ((isMemberOfSelectedPosCats skillId) && (not <| isMemberOfAnyCoreComp skillId))
+        )
         model.skills
 
 extractSelectables : List LinkedSelectable -> List Selectable.Model
