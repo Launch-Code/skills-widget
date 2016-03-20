@@ -114,15 +114,15 @@ view address model =
         [ multiSelectView
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
-            "Which types of apprenticeships are you interested in?"
+            "Select the type(s) of apprenticeships you are interested in"
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
-            "Select the technologies that you have completed a project in or feel most confident using."
+            "Select skills/technologies you completed a project with or feel most confident using"
         , multiSelectView
             (Signal.forwardTo address Skills)
             ((List.sortBy .name) <| extractSelectables <| availableSkills model)
-            "What other skills do you know?"
+            "Select any other skills or languages you might know"
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
