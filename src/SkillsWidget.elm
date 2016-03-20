@@ -122,7 +122,7 @@ view address model =
         , multiSelectView
             (Signal.forwardTo address Skills)
             ((List.sortBy .name) <| extractSelectables <| availableSkills model)
-            "Select any other skills or languages you might know"
+            "Select any additional skills or languages you might know"
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
