@@ -3,7 +3,6 @@ import Selectable
 import Json.Decode as Decode exposing (Decoder, (:=))
 import Json.Encode as Encode
 import Model exposing (Model, LinkedSelectable, Dependents (..))
-import Debug
 
 -- JSON parsing
 
@@ -55,7 +54,6 @@ posCatDecoder =
         selectableDecoder
         ("coreCompetencyIds" := Decode.list Decode.int)
         ("skillIds" := Decode.list Decode.int)
-        |> Debug.log "pos cat decoder"
 
 coreCompsDecoder : Decoder (List LinkedSelectable)
 coreCompsDecoder =
