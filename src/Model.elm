@@ -1,6 +1,7 @@
 module Model ( Model
              , LinkedSelectable
              , Dependents (Skill, PositionCategory, CoreCompetency)
+             , TextHeaders
              , Output
              , coreCompDependencies
              , skillDependencies
@@ -40,6 +41,14 @@ type alias Output =
   , coreCompetencyIds: List ID
   , skillIds: List ID
   }
+
+{-| A Record to define the headers for different skill widgets -}
+type alias TextHeaders =
+  { positionCategoryHeader: String
+  , coreCompetencyHeader: String
+  , skillHeader: String
+  }
+
 
 type alias ID = Int
 

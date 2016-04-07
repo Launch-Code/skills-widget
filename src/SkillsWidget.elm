@@ -11,7 +11,7 @@ import MultiSelect as MultSel
 import JsonParser
 import Json.Decode as Decode
 import Selectable
-import Model exposing (Model, LinkedSelectable, Output)
+import Model exposing (Model, LinkedSelectable, TextHeaders, Output)
 import Styles
 import Effects exposing (Effects)
 
@@ -29,9 +29,13 @@ app =
     , inputs = []
     }
 
+-- inputs
 port jsonData : String
 port isMultiple : Bool
+port textHeaders : TextHeaders
 port selected : Output
+
+-- output
 port output : Signal Output
 port output = Signal.map (outputModel) app.model
 
@@ -113,15 +117,15 @@ view address model =
         [ multiSelectView
             (Signal.forwardTo address PosCats)
             (extractSelectables model.positionCategories)
-            "Select the type(s) of apprenticeships you are interested in"
+            textHeaders.positionCategoryHeader
         , multiSelectView
             (Signal.forwardTo address CoreComps)
             (extractSelectables <| availableCompetencies model)
-            "Select skills/technologies you completed a project with or feel most confident using"
+            textHeaders.coreCompetencyHeader
         , multiSelectView
             (Signal.forwardTo address Skills)
             ((List.sortBy .name) <| extractSelectables <| availableSkills model)
-            "Select any additional skills or languages you might know"
+            textHeaders.skillHeader
         ]
 
 multiSelectView : Signal.Address MultSel.Action -> MultSel.Model -> String -> Html
