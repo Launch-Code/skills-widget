@@ -15,6 +15,8 @@ import Model exposing (Model, LinkedSelectable, TextHeaders, Output)
 import Styles
 import Effects exposing (Effects)
 
+import Debug
+
 -- Initialization
 main : Signal Html
 main =
@@ -23,7 +25,7 @@ main =
 app : StartApp.App Model
 app =
   StartApp.start
-    { init = (JsonParser.parseJson jsonData) |> (if isMultiple then setInitialSelected else identity) |> noEffects
+    { init = (JsonParser.parseJson jsonData) |> setInitialSelected |> noEffects
     , update = update
     , view = view
     , inputs = []
