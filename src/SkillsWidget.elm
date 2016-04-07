@@ -15,8 +15,6 @@ import Model exposing (Model, LinkedSelectable, Output)
 import Styles
 import Effects exposing (Effects)
 
-import Debug
-
 -- Initialization
 main : Signal Html
 main =
@@ -25,13 +23,14 @@ main =
 app : StartApp.App Model
 app =
   StartApp.start
-    { init = (JsonParser.parseJson jsonData) |> setInitialSelected |> noEffects
+    { init = (JsonParser.parseJson jsonData) |> (if isMultiple then setInitialSelected else identity) |> noEffects
     , update = update
     , view = view
     , inputs = []
     }
 
 port jsonData : String
+port isMultiple : Bool
 port selected : Output
 port output : Signal Output
 port output = Signal.map (outputModel) app.model
@@ -146,7 +145,7 @@ updateLinkedSels : MultSel.Action -> List LinkedSelectable -> List LinkedSelecta
 updateLinkedSels msAction linkedSels =
     linkedSels
         |> extractSelectables
-        |> MultSel.update msAction
+        |> MultSel.update msAction isMultiple
         |> (flip mergeNewSelectables) linkedSels
 
 

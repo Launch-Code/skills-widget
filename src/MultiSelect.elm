@@ -39,17 +39,23 @@ type alias ID = Int
 type Action
   = Selectable ID Sel.Action
 
-update : Action -> Model -> Model
-update action model =
+update : Action -> Bool -> Model -> Model
+update action isMultiple model =
     case action of
         Selectable selectedID selAction ->
-            let updateItem sel =
-              if sel.id == selectedID then
-                Sel.update selAction sel
-              else
-                sel
+            let
+              updateItem sel =
+                if sel.id == selectedID
+                then Sel.update selAction sel
+                else sel
+              clearSelected sel =
+                if sel.isSelected
+                then Sel.update selAction sel
+                else sel
             in
-               List.map updateItem model
+              if isMultiple
+              then List.map updateItem model
+              else List.map (updateItem << clearSelected) model
 
 -- VIEW
 view : Signal.Address Action -> Model -> Html
